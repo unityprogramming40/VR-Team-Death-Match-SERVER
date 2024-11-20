@@ -11,7 +11,7 @@ class AdminController {
             console.log('New client connected to admin controller');
 
             socket.on('teamChange', (data) => {
-                const teamChange = new TeamChange(data.playerName, data.newTeamID);
+                const teamChange = new TeamChange(data.playerID, data.newTeamID);
                 this.handleTeamChange(socket, teamChange);
             });
 

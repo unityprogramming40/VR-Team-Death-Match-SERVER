@@ -9,6 +9,7 @@ class PlayerController {
         io.on('connection', (socket) => {
             console.log('New client connected to player controller');
 
+            
             socket.on('playerTransform', (data) => {
                 const playerTransform = new PlayerTransform(
                     data.playerID,

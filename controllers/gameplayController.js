@@ -7,7 +7,9 @@ class GameplayController {
 
         io.on('connection', (socket) => {
             console.log('New client connected to gameplay controller');
-
+            //////////////////////////////////
+            this.io.emit('connectedMySelf');
+            ////////////////////////////////
             socket.on('startGame', (data) => {
                 this.gameData.startGame(data.timer, data.currentEnv);
                 this.io.emit('gameStarted', this.gameData);

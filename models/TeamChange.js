@@ -1,6 +1,6 @@
 class TeamChange {
-    constructor(playerName, newTeamID) {
-        this.playerName = playerName;
+    constructor(playerID, newTeamID) {
+        this.playerID = playerID;
         this.newTeamID = newTeamID;
     }
 }
