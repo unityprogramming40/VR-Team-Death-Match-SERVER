@@ -12,10 +12,10 @@ const io = socketIo(server);
 
 
 // Initialize Controllers with Socket.IO instance
-// new GunController(io);
-new AdminController(io);
-// new PlayerController(io);
-// new GameplayController(io);
+const GNC = new GunController(io);
+const PLC = new PlayerController(io);
+const ADC = new AdminController(io,PLC);
+const GPC = new GameplayController(io);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

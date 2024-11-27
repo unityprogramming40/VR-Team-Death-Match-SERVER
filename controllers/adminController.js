@@ -4,8 +4,9 @@ const ChangePosition = require('../models/admin/ChangePosition');
 const IntegerValue = require('../models/admin/IntegerValue');
 
 class AdminController {
-    constructor(io) {
+    constructor(io, playerControl) {
         this.io = io;
+        this.playerControl = playerControl;
 
         io.on('connection', (socket) => {
             console.log('New client connected to admin controller');
@@ -39,13 +40,23 @@ class AdminController {
     handleTeamChange(socket, teamChange) {
         console.log('Received Team Change:', teamChange);
         // Process team change and broadcast if necessary
-        this.io.emit('updateTeamChange', teamChange);
+        socket.emit('updateTeamChange', teamChange);
     }
 
-    handlePlayerNameChange(socket, playerNameChange) {
-        console.log('Received Player Name Change:', playerNameChange);
-        // Process player name change and broadcast if necessary
-        this.io.emit('updatePlayerNameChange', playerNameChange);
+    handlePlayerNameChange(socket, data) {
+        console.log('Received Player Name Change:', data);
+
+        const player = this.playerControl.PlayersData.find(p => p.playerID == data.playerID);
+
+        if (player) {
+            player.name = data.playerName;
+            socket.emit('updatePlayerName', data);
+
+            console.log("Player Change Name =>done");
+        }
+        else {
+            console.log("Player Change Name ID =>not found");
+        }
     }
 
     handleChangePosition(socket, changePosition) {

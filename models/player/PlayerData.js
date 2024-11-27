@@ -1,6 +1,7 @@
 class PlayerData {
-    constructor(playerID, health, teamID, killpoints, resetpointID) {
+    constructor(playerID, name,health, teamID, killpoints, resetpointID) {
         this.playerID = playerID;
+        this.name = name,
         this.health = health;
         this.teamID = teamID;
         this.killpoints = killpoints;

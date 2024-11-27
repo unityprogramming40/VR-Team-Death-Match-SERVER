@@ -2,7 +2,7 @@ const PlayerTransform = require('../models/player/PlayerTransform');
 const PlayerData = require('../models/player/PlayerData');
 const CustomeIntegerValue = require('../models/player/CustomeIntegerValue');
 
-var PlayersData = [new PlayerData("201", 100, 1, 15, 2), new PlayerData("202", 100, 1, 15, 2)];
+var PlayersData = [new PlayerData("201", "p1", 100, 1, 15, 2), new PlayerData("202", "p2", 100, 1, 15, 2)];
 var PlayersTransform = [
     new PlayerTransform("201",
         [2.1, 1.1, 12.3], [2.1, 1.1, 12.3],
@@ -91,6 +91,7 @@ class PlayerController {
 
         if (player) {
 
+            player.name = data.name;
             player.health = data.health;
             player.teamID = data.teamID;
             player.killpoints = data.killpoints;
@@ -103,6 +104,7 @@ class PlayerController {
         } else {
             const playerData = new PlayerData(
                 data.playerID,
+                data.name,
                 data.health,
                 data.teamID,
                 data.killpoints,
