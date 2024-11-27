@@ -1,4 +1,4 @@
-const GameData = require('../models/GameData');
+const GameData = require('../models/gameplay/GameData');
 
 class GameplayController {
     constructor(io) {

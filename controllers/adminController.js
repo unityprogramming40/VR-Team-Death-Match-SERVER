@@ -1,7 +1,7 @@
-const TeamChange = require('../models/TeamChange');
-const PlayerNameChange = require('../models/PlayerNameChange');
-const ChangePosition = require('../models/ChangePosition');
-const IntegerValue = require('../models/IntegerValue');
+const TeamChange = require('../models/admin/TeamChange');
+const PlayerNameChange = require('../models/admin/PlayerNameChange');
+const ChangePosition = require('../models/admin/ChangePosition');
+const IntegerValue = require('../models/admin/IntegerValue');
 
 class AdminController {
     constructor(io) {

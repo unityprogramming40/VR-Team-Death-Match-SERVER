@@ -1,5 +1,5 @@
-const GunData = require('../models/GunData');
-const BulletData = require('../models/BulletData');
+const GunData = require('../models/gun/GunData');
+const BulletData = require('../models/gun/BulletData');
 
 class GunController {
     constructor(io) {
