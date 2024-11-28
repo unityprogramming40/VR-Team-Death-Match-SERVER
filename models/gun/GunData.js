@@ -1,14 +1,24 @@
 class GunData {
-    constructor(gunID, playerID, teamID, position, rotation, maxBullets, currentBullets, damage, resetPoint) {
+    constructor({
+        gunID,
+        playerID = "none",
+        teamID = 0,
+        position = [0, 0, 0],      // Array of floats
+        rotation = [0, 0, 0],      // Array of floats
+        maxBullets = 30,
+        currentBullets = 30,
+        damage = 10,
+        resetPoint = [0, 0, 0]     // Array of floats
+    } = {}) {
         this.gunID = gunID;
         this.playerID = playerID;
         this.teamID = teamID;
-        this.position = position;       // Array of floats
-        this.rotation = rotation;       // Array of floats
+        this.position = position;
+        this.rotation = rotation;
         this.maxBullets = maxBullets;
         this.currentBullets = currentBullets;
         this.damage = damage;
-        this.resetPoint = resetPoint;   // Array of floats
+        this.resetPoint = resetPoint;
     }
 }
 

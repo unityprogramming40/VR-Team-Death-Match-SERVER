@@ -9,34 +9,59 @@ const GunsData = [
 class GunController {
     constructor(io) {
         this.io = io;
+        this.initializeSocketEvents(io);
+    }
 
+    initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            console.log('New client connected');
+            console.log('New client connected to GunController');
 
-            socket.on('sendGunData', (data) => {
-                this.handleGunData(socket, gunData);
-            });
-
-            socket.on('sendBulletData', (data) => {
-                const bulletData = new BulletData(data.gunID, data.playerID, data.teamID, data.damage);
-                this.handleBulletData(socket, bulletData);
-            });
-
-            socket.on('disconnect', () => {
-                console.log('Client disconnected');
-            });
+            socket.on('sendGunData', (data) => this.handleGunData(socket, this.createGunData(data)));
+            socket.on('sendBulletData', (data) => this.handleBulletData(socket, this.createBulletData(data)));
+            socket.on('disconnect', () => console.log('Client disconnected from GunController'));
         });
+    }
+
+    createGunData(data) {
+        return new GunData(
+            data.gunID,
+            data.playerID,
+            data.teamID,
+            data.position,
+            data.rotation,
+            data.maxBullets,
+            data.currentBullets,
+            data.damage,
+            data.resetPoint
+        );
+    }
+
+    createBulletData(data) {
+        return new BulletData(data.gunID, data.playerID, data.teamID, data.damage);
+    }
+
+    findAndUpdateGun(gunID, updateFn) {
+        const gun = GunsData.find(g => g.gunID === gunID);
+        if (gun) {
+            updateFn(gun);
+            return gun;
+        }
+        return null;
+    }
+
+    emitAndLog(socket, event, data, successMessage, errorMessage) {
+        if (data) {
+            socket.emit(event, data);
+            console.log(successMessage);
+        } else {
+            console.log(errorMessage);
+        }
     }
 
     handleGunData(socket, data) {
         console.log('Received Gun Data:', data);
 
-        // Process player data and broadcast if necessary
-
-        const gun = GunsData.find(g => g.gunID == data.gunID);
-
-        if (gun) {
-
+        const updateGunData = (gun) => {
             gun.playerID = data.playerID;
             gun.teamID = data.teamID;
             gun.position = data.position;
@@ -45,34 +70,29 @@ class GunController {
             gun.currentBullets = data.currentBullets;
             gun.damage = data.damage;
             gun.resetPoint = data.resetPoint;
+        };
 
-            socket.emit('updateGunData', gun);
-
-            console.log("Gun Data =>done");
-
-        } else {
-            const gunData = new GunData(
-                data.playerID,
-                data.teamID,
-                data.position,
-                data.rotation,
-                data.maxBullets,
-                data.currentBullets,
-                data.damage,
-                data.resetPoint
-            );
-            GunsData.push(gunData);
-
-            socket.emit('updateGunData', gunData);
-
-            console.log("Gun Data =>not found");
+        let gun = this.findAndUpdateGun(data.gunID, updateGunData);
+        if (!gun) {
+            gun = this.createGunData(data);
+            GunsData.push(gun);
         }
+
+        this.emitAndLog(
+            socket,
+            'updateGunData',
+            gun,
+            "Gun Data => updated successfully",
+            "Gun Data => not found, added new entry"
+        );
     }
 
     handleBulletData(socket, bulletData) {
         console.log('Received Bullet Data:', bulletData);
-        // Add any processing logic needed for bullet data
+
+        // Process and broadcast bullet data if necessary
         socket.emit('updateBulletData', bulletData);
+        console.log("Bullet Data => processed and broadcasted");
     }
 }
 
