@@ -7,6 +7,7 @@ const GunController = require('./controllers/gunController');
 const AdminController = require('./controllers/adminController');
 const PlayerController = require('./controllers/playerController');
 const GameplayController = require('./controllers/gameplayController');
+const TeamController = require('./controllers/teamController');
 
 // Initialize Express app and HTTP server
 const app = express();
@@ -16,8 +17,9 @@ const io = socketIo(server);
 // Initialize controllers with the Socket.IO instance
 const gunController = new GunController(io);
 const playerController = new PlayerController(io);
-const adminController = new AdminController(io, playerController);
+const teamController = new TeamController(io,playerController);
 const gameplayController = new GameplayController(io);
+const adminController = new AdminController(io,gunController, playerController,teamController,gameplayController);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

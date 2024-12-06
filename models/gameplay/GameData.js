@@ -1,6 +1,23 @@
 class GameData {
     constructor() {
-        this.resetGame();
+        // Game state attributes
+        this.gameStarted = false;
+        this.gamePaused = false;
+        this.gameStopped = false;
+        this.gameCompleted = false;
+
+        // Timer attributes
+        this.mainTimer = null;
+        this.currentTime = 0;
+
+        // Team attributes
+        this.team1Players = [];
+        this.team2Players = [];
+        this.team1Killpoints = 0;
+        this.team2Killpoints = 0;
+
+        // Environment attributes
+        this.currentEnvID = 0;
     }
 
     resetGame() {
@@ -31,16 +48,19 @@ class GameData {
         this.gameStarted = true;
         this.mainTimer = timer;
         this.currentEnvID = currentEnv;
+        console.log('startGame',this.mainTimer,this.currentEnvID)
     }
 
     pauseGame() {
         this.gamePaused = true;
+        console.log('pauseGame',this.gamePaused)
     }
 
     stopGame() {
         this.gameStopped = true;
         this.resetPoints();
         this.resetTimer();
+        console.log('stopGame',this.gameStopped)
     }
 
     completeGame() {
@@ -50,26 +70,32 @@ class GameData {
 
     addPlayerTeam1(playerID) {
         this.team1Players.push(playerID);
+        console.log('addPlayerTeam1',this.team1Players)
     }
 
     addPlayerTeam2(playerID) {
         this.team2Players.push(playerID);
+        console.log('addPlayerTeam2',this.team2Players)
     }
 
     addTeam1Point() {
         this.team1Killpoints++;
+        console.log('addTeam1Point',this.team1Killpoints)
     }
 
     addTeam2Point() {
         this.team2Killpoints++;
+        console.log('addTeam2Point',this.team2Killpoints)
     }
 
     removePlayerTeam1(playerID) {
         this.team1Players = this.team1Players.filter(id => id !== playerID);
+        console.log('removePlayerTeam1',this.team1Players)
     }
 
     removePlayerTeam2(playerID) {
         this.team2Players = this.team2Players.filter(id => id !== playerID);
+        console.log('removePlayerTeam2',this.team2Players)
     }
 
     resetPoints() {

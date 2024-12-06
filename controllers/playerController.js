@@ -31,6 +31,10 @@ class PlayerController {
         io.on('connection', (socket) => {
             console.log('New client connected to player controller');
 
+            //////////////////////////////////
+            socket.emit('PlayerConnect');
+            ////////////////////////////////
+
             socket.on('playerTransform', (data) => this.handlePlayerTransform(socket, data));
             socket.on('playerData', (data) => this.handlePlayerData(socket, this.createPlayerData(data)));
             socket.on('disconnect', () => console.log('Client disconnected from player controller'));
@@ -50,9 +54,18 @@ class PlayerController {
         return null;
     }
 
+    FindPlayer(playerID) {
+        const player = PlayersData.find(p => p.playerID === playerID);
+        if (player) {
+            return player;
+        }
+        return null;
+    }
+
     emitAndLog(socket, event, data, successMessage, errorMessage) {
         if (data) {
             socket.emit(event, data);
+
             console.log(successMessage);
         } else {
             console.log(errorMessage);

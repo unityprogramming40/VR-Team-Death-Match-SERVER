@@ -8,16 +8,14 @@ class AdminController {
      * AdminController handles admin-related events via Socket.IO.
      * @param {object} io - The Socket.IO instance.
      * @param {object} playerControl - Reference to the PlayerController instance.
+     * @param {object} teamController - Reference to the TeamController instance.
      */
-    constructor(io, playerControl) {
+    constructor(io,gunController, playerController,teamController,gameplayController) {
         this.io = io;
-        this.playerControl = playerControl;
-
-        // Initialize teams
-        this.teams = [
-            { teamID: 1, teamName: 'Team Alpha', players: [] },
-            { teamID: 2, teamName: 'Team Bravo', players: [] }
-        ];
+        this.gunController = gunController;
+        this.playerController = playerController;
+        this.teamController = teamController;
+        this.gameplayController = gameplayController;
 
         this.initializeSocketEvents(io);
     }
@@ -30,6 +28,7 @@ class AdminController {
         io.on('connection', (socket) => {
             console.log('New client connected to admin controller');
 
+
             socket.on('teamChange', (data) => this.handleTeamChange(socket, new TeamChange(data.playerID, data.newTeamID)));
             socket.on('playerNameChange', (data) => this.handlePlayerNameChange(socket, new PlayerNameChange(data.playerID, data.playerName)));
             socket.on('changePosition', (data) => this.handleChangePosition(socket, new ChangePosition(data.id, data.position)));
@@ -39,13 +38,14 @@ class AdminController {
         });
     }
 
+
     /**
      * Handles team change requests and updates the teams array.
      * @param {object} socket - The client's socket instance.
      * @param {object} teamChange - The TeamChange instance.
      */
     handleTeamChange(socket, teamChange) {
-        console.log('Received Team Change:', teamChange);
+        console.log('ON-Received Team Change:', teamChange);
 
         // Validate input
         if (!teamChange.playerID || typeof teamChange.newTeamID !== 'number') {
@@ -54,7 +54,7 @@ class AdminController {
             return;
         }
 
-        const player = this.playerControl.PlayersData.find(p => p.playerID === teamChange.playerID);
+        const player = this.playerControl.FindPlayer(teamChange.playerID);
 
         if (player) {
             const oldTeamID = player.teamID;
@@ -89,6 +89,7 @@ class AdminController {
      * @param {number} teamID - The ID of the team.
      */
     addPlayerToTeam(playerID, teamID) {
+        console.log('ON-addPlayerToTeam:', playerID, teamID);
         const team = this.teams.find(t => t.teamID === teamID);
         if (team) {
             team.players.push(playerID);
@@ -104,6 +105,7 @@ class AdminController {
      * @param {number} teamID - The ID of the team.
      */
     removePlayerFromTeam(playerID, teamID) {
+        console.log('ON-removePlayerFromTeam:', playerID, teamID);
         const team = this.teams.find(t => t.teamID === teamID);
         if (team) {
             team.players = team.players.filter(id => id !== playerID);
@@ -119,9 +121,9 @@ class AdminController {
      * @param {object} playerNameChange - The PlayerNameChange instance.
      */
     handlePlayerNameChange(socket, playerNameChange) {
-        console.log('Received Player Name Change:', playerNameChange);
+        console.log('ON-Received Player Name Change:', playerNameChange);
 
-        const player = this.playerControl.PlayersData.find(p => p.playerID === playerNameChange.playerID);
+        const player = this.playerControl.FindPlayer(playerNameChange.playerID);
 
         if (player) {
             player.name = playerNameChange.playerName;
@@ -142,11 +144,11 @@ class AdminController {
      * @param {object} changePosition - The ChangePosition instance.
      */
     handleChangePosition(socket, changePosition) {
-        console.log('Received Change Position:', changePosition);
+        console.log('ON-Received Change Position:', changePosition);
 
         // Broadcast the position change event
         socket.emit('updateChangePosition', changePosition);
-        console.log("Position Change processed and broadcasted.");
+        console.log("Position Change proccesed and broadcasted.");
     }
 
     /**
