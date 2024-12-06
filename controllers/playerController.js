@@ -3,7 +3,7 @@ const PlayerData = require('../models/player/PlayerData');
 
 const PlayersData = [
     new PlayerData("201", "p1", 100, 1, 15, 2),
-    new PlayerData("202", "p2", 100, 1, 15, 2),
+    new PlayerData("202", "p2", 100, 1, 15, 2)
 ];
 
 const PlayersTransform = [
@@ -18,7 +18,7 @@ const PlayersTransform = [
         [2.1, 1.1, 12.3], [2.1, 1.1, 12.3],
         [2.1, 1.1, 12.3], [2.1, 1.1, 12.3],
         [2.1, 1.1, 12.3], [2.1, 1.1, 12.3]
-    ),
+    )
 ];
 
 class PlayerController {

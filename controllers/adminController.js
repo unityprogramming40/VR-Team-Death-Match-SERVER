@@ -127,7 +127,7 @@ class AdminController {
             player.name = playerNameChange.playerName;
 
             // Broadcast the updated player name
-            this.io.emit('updatePlayerName', playerNameChange);
+            socket.emit('updatePlayerName', playerNameChange);
 
             console.log("Player Name Change processed successfully.");
         } else {
@@ -145,7 +145,7 @@ class AdminController {
         console.log('Received Change Position:', changePosition);
 
         // Broadcast the position change event
-        this.io.emit('updateChangePosition', changePosition);
+        socket.emit('updateChangePosition', changePosition);
         console.log("Position Change processed and broadcasted.");
     }
 
