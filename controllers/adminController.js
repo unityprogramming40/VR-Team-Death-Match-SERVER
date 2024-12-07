@@ -46,33 +46,43 @@ class AdminController {
      */
     handleTeamChange(socket, teamChange) {
         console.log('ON-Received Team Change:', teamChange);
-
+    
         // Validate input
         if (!teamChange.playerID || typeof teamChange.newTeamID !== 'number') {
             console.error('Invalid team change data:', teamChange);
             socket.emit('teamChangeError', { error: 'Invalid team change data.' });
             return;
         }
-
+    
         const player = this.playerControl.FindPlayer(teamChange.playerID);
-
+    
         if (player) {
             const oldTeamID = player.teamID;
+    
+            // Check if player exists in the current team
+            const teamPlayers = oldTeamID === 1 ? this.team1Players : this.team2Players;
+            if (!teamPlayers.includes(player.playerID)) {
+                console.error(`Player ${player.playerID} not found in Team ${oldTeamID}.`);
+                socket.emit('teamChangeError', { error: `Player ${player.playerID} not found in Team ${oldTeamID}.` });
+                return;
+            }
+    
+            // Proceed with team change
             player.teamID = teamChange.newTeamID;
-
+    
             // Update teams array
             this.removePlayerFromTeam(player.playerID, oldTeamID);
             this.addPlayerToTeam(player.playerID, teamChange.newTeamID);
-
+    
             console.log(`Player ${player.playerID} moved from Team ${oldTeamID} to Team ${player.teamID}.`);
-
+    
             // Broadcast the change
             this.io.emit('updateTeamChange', {
                 playerID: player.playerID,
                 oldTeamID,
                 newTeamID: player.teamID
             });
-
+    
             // Acknowledge success
             socket.emit('teamChangeSuccess', {
                 message: `Player ${player.playerID} successfully moved to Team ${player.teamID}.`
@@ -82,6 +92,7 @@ class AdminController {
             socket.emit('teamChangeError', { error: `Player ID ${teamChange.playerID} not found.` });
         }
     }
+    
 
     /**
      * Adds a player to the specified team.

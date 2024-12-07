@@ -69,14 +69,24 @@ class GameData {
     }
 
     addPlayerTeam1(playerID) {
-        this.team1Players.push(playerID);
-        console.log('addPlayerTeam1',this.team1Players)
+        if (this.team1Players.includes(playerID)) {
+            console.log(`Player ${playerID} is already in Team 1`);
+        } else {
+            this.team1Players.push(playerID);
+            console.log('addPlayerTeam1', this.team1Players);
+        }
     }
+    
 
     addPlayerTeam2(playerID) {
-        this.team2Players.push(playerID);
-        console.log('addPlayerTeam2',this.team2Players)
+        if (this.team2Players.includes(playerID)) {
+            console.log(`Player ${playerID} is already in Team 2`);
+        } else {
+            this.team2Players.push(playerID);
+            console.log('addPlayerTeam2', this.team2Players);
+        }
     }
+    
 
     addTeam1Point() {
         this.team1Killpoints++;
