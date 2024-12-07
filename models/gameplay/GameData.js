@@ -11,8 +11,8 @@ class GameData {
         this.currentTime = 0;
 
         // Team attributes
-        this.team1Players = [];
-        this.team2Players = [];
+        this.team1Players = ["222","5555"];
+        this.team2Players = ["576","787"];
         this.team1Killpoints = 0;
         this.team2Killpoints = 0;
 
@@ -119,6 +119,13 @@ class GameData {
 
     resetTeam2Points() {
         this.team2Killpoints = 0;
+    }
+
+    getTeams() {
+        return {
+            team1Players: this.team1Players,
+            team2Players: this.team2Players
+        };
     }
 }
 

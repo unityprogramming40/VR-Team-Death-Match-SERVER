@@ -69,6 +69,10 @@ class GameplayController {
             });
         });
     }
+
+    getTeams(){
+        return this.gameData.getTeams();
+    }
 }
 
 module.exports = GameplayController;

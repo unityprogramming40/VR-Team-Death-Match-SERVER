@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams</title>
+</head>
+<body>
+    <h1>Teams</h1>
+
+    <h2>Team 1 Players</h2>
+    <ul>
+        <% teams.team1Players.forEach(player => { %>
+            <li><%= player %></li>
+        <% }); %>
+    </ul>
+
+    <h2>Team 2 Players</h2>
+    <ul>
+        <% teams.team2Players.forEach(player => { %>
+            <li><%= player %></li>
+        <% }); %>
+    </ul>
+
+    <h2>Reset Teams</h2>
+    <form action="/teams/reset" method="POST">
+        <button type="submit">Reset Teams</button>
+    </form>
+</body>
+</html>
