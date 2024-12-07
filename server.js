@@ -2,6 +2,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const expressApp = require('./app'); // ملف إعدادات Express
 const teamRoutes = require('./routes/teamRoutes'); // ملف المسارات
+const playersRoutes = require('./routes/playersRoutes');
 
 // Import controllers
 const GunController = require('./controllers/gunController');
@@ -24,6 +25,7 @@ const adminController = new AdminController(io, gunController, playerController,
 
 // استخدام مسارات الفرق
 app.use('/teams', teamRoutes(gameplayController));
+app.use('/players', playersRoutes(playerController));
 
 // تشغيل الخادم
 const PORT = process.env.PORT || 3000;

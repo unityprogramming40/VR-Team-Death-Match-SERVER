@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teams</title>
+    <title>Team Players</title>
 </head>
 <body>
-    <h1>Teams</h1>
+    <h1>Players</h1>
+    <hr />
 
     <h2>Team 1 Players</h2>
     <ul>
-        <% teams.team1Players.forEach(player => { %>
+        <% players.team1Players.forEach(player => { %>
             <li><%= player %></li>
         <% }); %>
     </ul>
+    <hr />
 
     <h2>Team 2 Players</h2>
     <ul>
-        <% teams.team2Players.forEach(player => { %>
+        <% players.team2Players.forEach(player => { %>
             <li><%= player %></li>
         <% }); %>
     </ul>

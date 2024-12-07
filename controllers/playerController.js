@@ -213,6 +213,14 @@ class PlayerController {
             "Player Data Reset => error wrong id"
         );
     }
+
+    getPlayersData(){
+        return PlayersData;
+    }
+
+    getPlayersTransform(){
+        return PlayersTransform;
+    }
 }
 
 module.exports = PlayerController;

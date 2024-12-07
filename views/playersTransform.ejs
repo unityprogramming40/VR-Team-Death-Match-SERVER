@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Players Transform</title>
+</head>
+<body>
+    <h1>Transform</h1>
+    <hr />
+
+    <% playersTransform.forEach(player => { %>
+        <div>
+            <h2>Player ID: <%= player.playerID %></h2>
+            <p><strong>headPosition :</strong> <%= player.headPosition.join(", ") %></p>
+            <p><strong>headRotation :</strong> <%= player.headRotation.join(", ") %></p>
+            <p><strong>rHandPosition :</strong> <%= player.rHandPosition.join(", ") %></p>
+            <p><strong>rHandRotation :</strong> <%= player.rHandRotation.join(", ") %></p>
+            <p><strong>lHandPosition :</strong> <%= player.lHandPosition.join(", ") %></p>
+            <p><strong>lHandRotation :</strong> <%= player.lHandRotation.join(", ") %></p>
+        </div>
+        <hr />
+    <% }); %>
+</body>
+</html>

@@ -4,10 +4,10 @@ const router = express.Router();
 module.exports = (gameplayController) => {
 
     // عرض الفرق على صفحة HTML
-    router.get('/view', (req, res) => {
-        const teams = gameplayController.getTeams();
-        res.render('teams', { teams });
+    router.get('/players', (req, res) => {
+        const players = gameplayController.getTeams();
+        res.render('teamPlayers', { players });
     });
-
+    
     return router;
 };
