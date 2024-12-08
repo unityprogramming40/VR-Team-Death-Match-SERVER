@@ -1,30 +1,19 @@
 const PlayerTransform = require('../models/player/PlayerTransform');
 const PlayerData = require('../models/player/PlayerData');
 
-const PlayersData = [
-    new PlayerData("201", "p1", 100, 1, 15, 2),
-    new PlayerData("202", "p2", 100, 1, 15, 2)
-];
+const PlayersData = [];
 
-const PlayersTransform = [
-    new PlayerTransform(
-        "201",
-        [2.1, 1.1, 12.3], [2.1, 1.1, 12.3],
-        [2.1, 1.1, 12.3], [2.1, 1.1, 12.3],
-        [2.1, 1.1, 12.3], [2.1, 1.1, 12.3]
-    ),
-    new PlayerTransform(
-        "202",
-        [2.1, 1.1, 12.3], [2.1, 1.1, 12.3],
-        [2.1, 1.1, 12.3], [2.1, 1.1, 12.3],
-        [2.1, 1.1, 12.3], [2.1, 1.1, 12.3]
-    )
-];
+const PlayersTransform = [];
 
 class PlayerController {
     constructor(io) {
         this.io = io;
+        this.teamController = null;
         this.initializeSocketEvents(io);
+    }
+
+    setTeamController(teamController) {
+        this.teamController = teamController;
     }
 
     initializeSocketEvents(io) {
@@ -32,7 +21,7 @@ class PlayerController {
             console.log('New client connected to player controller');
 
             //////////////////////////////////
-            socket.emit('PlayerConnect');
+            socket.emit('NewConnect');
             ////////////////////////////////
 
             socket.on('playerTransform', (data) => this.handlePlayerTransform(socket, data));
@@ -54,7 +43,8 @@ class PlayerController {
         return null;
     }
 
-    FindPlayer(playerID) {
+    
+     FindPlayer(playerID) {
         const player = PlayersData.find(p => p.playerID === playerID);
         if (player) {
             return player;
@@ -121,8 +111,13 @@ class PlayerController {
         let player = this.findAndUpdatePlayer(PlayersData, data.playerID, updatePlayerData);
         if (!player) {
             player = this.createPlayerData(data);
+
             PlayersData.push(player);
+            console.log(player.playerID,player.teamID)
+            this.teamController.addPlayerToTeam(player.playerID,player.teamID);
+
         }
+
 
         this.emitAndLog(
             socket,
@@ -154,17 +149,6 @@ class PlayerController {
         );
     }
 
-    handleTeamChange(socket, data) {
-        console.log('Received Player Team Change:', data);
-        this.handleCustomUpdate(
-            socket,
-            data,
-            'teamID',
-            'updatePlayerTeamChange',
-            "Player Team Changed => done",
-            "Player Team Changed => error wrong id"
-        );
-    }
 
     handleResetPointChange(socket, data) {
         console.log('Received Player Reset Point Change:', data);

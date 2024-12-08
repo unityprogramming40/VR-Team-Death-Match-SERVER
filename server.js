@@ -18,10 +18,14 @@ const io = socketIo(server);
 
 // Initialize controllers with the Socket.IO instance
 const gunController = new GunController(io);
+const teamController = new TeamController(io);
 const playerController = new PlayerController(io);
-const teamController = new TeamController(io, playerController);
 const gameplayController = new GameplayController(io);
 const adminController = new AdminController(io, gunController, playerController, teamController, gameplayController);
+
+teamController.setPlayerController(playerController);
+playerController.setTeamController(teamController);
+
 
 // استخدام مسارات الفرق
 app.use('/teams', teamRoutes(gameplayController));
