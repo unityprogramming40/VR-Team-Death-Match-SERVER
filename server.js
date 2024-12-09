@@ -10,6 +10,7 @@ const AdminController = require('./controllers/adminController');
 const PlayerController = require('./controllers/playerController');
 const GameplayController = require('./controllers/gameplayController');
 const TeamController = require('./controllers/teamController');
+const gameplayRoutes = require('./routes/gameplayRoutes');
 
 // إعداد Express
 const app = expressApp();
@@ -36,6 +37,7 @@ adminController.setGameplayController(gameplayController);
 // استخدام مسارات الفرق
 app.use('/teams', teamRoutes(teamController));
 app.use('/players', playersRoutes(playerController));
+app.use('/gameplay', gameplayRoutes(gameplayController));
 
 // تشغيل الخادم
 const PORT = process.env.PORT || 3000;

@@ -7,7 +7,7 @@ class GameData {
         this.gameCompleted = false;
 
         // Timer attributes
-        this.mainTimer = null;
+        this.mainTimer = 0;
         this.currentTime = 0;
 
         // Environment attributes
