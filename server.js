@@ -34,7 +34,7 @@ adminController.setGameplayController(gameplayController);
 
 
 // استخدام مسارات الفرق
-app.use('/teams', teamRoutes(gameplayController));
+app.use('/teams', teamRoutes(teamController));
 app.use('/players', playersRoutes(playerController));
 
 // تشغيل الخادم
