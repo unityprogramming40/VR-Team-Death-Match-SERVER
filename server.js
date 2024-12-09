@@ -21,10 +21,16 @@ const gunController = new GunController(io);
 const teamController = new TeamController(io);
 const playerController = new PlayerController(io);
 const gameplayController = new GameplayController(io);
-const adminController = new AdminController(io, gunController, playerController, teamController, gameplayController);
+const adminController = new AdminController(io);
 
 teamController.setPlayerController(playerController);
+
 playerController.setTeamController(teamController);
+
+adminController.setGunController(gunController);
+adminController.setTeamController(teamController);
+adminController.setPlayerController(playerController);
+adminController.setGameplayController(gameplayController);
 
 
 // استخدام مسارات الفرق

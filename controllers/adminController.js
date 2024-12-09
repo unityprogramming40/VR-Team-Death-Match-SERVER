@@ -10,14 +10,30 @@ class AdminController {
      * @param {object} playerControl - Reference to the PlayerController instance.
      * @param {object} teamController - Reference to the TeamController instance.
      */
-    constructor(io,gunController, playerController,teamController,gameplayController) {
+    constructor(io) {
         this.io = io;
-        this.gunController = gunController;
-        this.playerController = playerController;
-        this.teamController = teamController;
-        this.gameplayController = gameplayController;
+        this.gunController = null;
+        this.playerController = null;
+        this.teamController = null;
+        this.gameplayController = null;
 
         this.initializeSocketEvents(io);
+    }
+
+    setGunController(gunController){
+        this.gunController = gunController;
+    }
+
+    setPlayerController(playerController){
+        this.playerController = playerController;
+    }
+
+    setTeamController(teamController){
+        this.teamController = teamController;
+    }
+
+    setGameplayController(gameplayController){
+        this.gameplayController = gameplayController;
     }
 
     /**
