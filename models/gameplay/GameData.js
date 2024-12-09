@@ -17,7 +17,6 @@ class GameData {
     resetGame() {
         this.resetState();
         this.resetTimer();
-        this.resetTeams();
         this.currentEnvID = 0;
     }
 
@@ -26,12 +25,6 @@ class GameData {
         this.gamePaused = false;
         this.gameStopped = false;
         this.gameCompleted = false;
-    }
-
-    resetTeams() {
-        this.team1Players = [];
-        this.team2Players = [];
-        this.resetPoints();
     }
 
     resetTimer() {
@@ -52,7 +45,6 @@ class GameData {
 
     stopGame() {
         this.gameStopped = true;
-        this.resetPoints();
         this.resetTimer();
         console.log('stopGame',this.gameStopped)
     }
