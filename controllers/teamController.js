@@ -1,18 +1,17 @@
 const TeamData = require('../models/team/TeamData');
 const MainController = require('./mainController');
 
-
-class TeamController extends MainController{
+/**
+ * TeamController manages team-related operations and events via Socket.IO.
+ */
+class TeamController extends MainController {
     /**
-     * AdminController handles admin-related events via Socket.IO.
      * @param {object} io - The Socket.IO instance.
-     * @param {object} playerControl - Reference to the PlayerController instance.
      */
-    
     constructor(io) {
         super(io);
 
-        this.playerControl = null;
+        this.playerController = null;
 
         // Initialize teams
         this.teams = [
@@ -23,6 +22,10 @@ class TeamController extends MainController{
         this.initializeSocketEvents(io);
     }
 
+    /**
+     * Sets the PlayerController instance.
+     * @param {object} playerController - The PlayerController instance.
+     */
     setPlayerController(playerController) {
         this.playerController = playerController;
     }
@@ -33,113 +36,133 @@ class TeamController extends MainController{
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            //console.log('New client connected to admin controller');
+            console.log('New client connected to TeamController.');
 
-            //
             socket.on('getTeams', () => this.sendTeams(socket));
-            socket.on('renameTeam', (data) => this.RenameTeam(socket, data));
+            socket.on('renameTeam', (data) => this.renameTeam(socket, data));
 
-            socket.on('disconnect', () => console.log(''));
+            socket.on('disconnect', () => console.log('Client disconnected from TeamController.'));
         });
     }
 
-
-
+    /**
+     * Sends all teams to the connected client.
+     * @param {object} socket - The client's socket instance.
+     */
     sendTeams(socket) {
         try {
-            //console.log('ON-Received Get Teams');
-
-            socket.emit('Teams', { team: this.teams });
-
+            console.log('Sending team data to client.');
+            socket.emit('Teams', { teams: this.teams });
         } catch (error) {
-            console.error('Error in GetTeams:', error);
+            console.error('Error in sendTeams:', error);
         }
     }
 
+    /**
+     * Returns all teams.
+     * @returns {TeamData[]} The list of teams.
+     */
     getTeams() {
         return this.teams;
     }
 
-
-
-    RenameTeam(socket, data) {
-        const team = this.teams.find(t => t.teamID === data.iValue);
-        if (data) {
-            if (team) {
-                team.teamName = data.sID;
-                console.log('RenamedTeam', team)
-                
-            } else {
-                console.error('Team is Null')
-            }
-        } else {
-            console.error('Data is Null')
-
+    /**
+     * Renames a team based on the provided data.
+     * @param {object} socket - The client's socket instance.
+     * @param {object} data - The data containing `iValue` (teamID) and `sID` (new name).
+     */
+    renameTeam(socket, data) {
+        if (!data || typeof data.iValue !== 'number' || typeof data.sID !== 'string') {
+            console.error('Invalid data received for renameTeam:', data);
+            return;
         }
 
-
+        const team = this.teams.find(t => t.teamID === data.iValue);
+        if (team) {
+            team.teamName = data.sID;
+            console.log(`Renamed Team ${data.iValue} to "${data.sID}".`, team);
+        } else {
+            console.error(`Team with ID ${data.iValue} not found.`);
+        }
     }
 
+    /**
+     * Adds a player to a team.
+     * @param {string} playerID - The ID of the player to add.
+     * @param {number} teamID - The ID of the team.
+     */
     addPlayerToTeam(playerID, teamID) {
-
-        const team = this.teams.find(team => team.teamID === teamID);
+        const team = this.teams.find(t => t.teamID === teamID);
 
         if (team) {
             if (team.players.includes(playerID)) {
-                console.log(`Player ${playerID} is already in Team ${teamID}`);
+                console.log(`Player ${playerID} is already in Team ${teamID}.`);
             } else {
                 team.players.push(playerID);
-                console.log('addPlayerTeam', team);
+                console.log(`Player ${playerID} added to Team ${teamID}.`, team);
             }
         } else {
-            console.error(`Team ${teamID} does not exist.`);
+            console.error(`Team with ID ${teamID} not found.`);
         }
-
     }
 
-
+    /**
+     * Removes a player from a team.
+     * @param {string} playerID - The ID of the player to remove.
+     * @param {number} teamID - The ID of the team.
+     */
     removePlayerFromTeam(playerID, teamID) {
-        var team = this.teams.find(team => team.teamID === teamID);
+        const team = this.teams.find(t => t.teamID === teamID);
 
         if (team) {
             if (team.players.includes(playerID)) {
                 team.players = team.players.filter(id => id !== playerID);
-                console.log('Player removed successfully:', playerID);
+                console.log(`Player ${playerID} removed from Team ${teamID}.`, team);
             } else {
-                console.error(`Player ${playerID} does not exist in Team ${teamID}`);
+                console.error(`Player ${playerID} not found in Team ${teamID}.`);
             }
         } else {
-            console.error(`Team ${teamID} does not exist.`);
+            console.error(`Team with ID ${teamID} not found.`);
         }
     }
 
-
+    /**
+     * Adds a point to a team's score.
+     * @param {number} teamID - The ID of the team.
+     */
     addTeamPoint(teamID) {
-        const team = this.teams.find(teamID);
+        const team = this.teams.find(t => t.teamID === teamID);
 
-        team.teamPoints++;
-        console.log('addedTeamPoint', team)
+        if (team) {
+            team.teamPoints++;
+            console.log(`Point added to Team ${teamID}. Current points: ${team.teamPoints}.`, team);
+        } else {
+            console.error(`Team with ID ${teamID} not found.`);
+        }
     }
 
+    /**
+     * Resets a team's points and all associated players' kill points.
+     * @param {number} teamID - The ID of the team.
+     */
     resetTeamPoints(teamID) {
-        const team = this.teams.find(teamID);
-        team.teamPoints = 0;
+        const team = this.teams.find(t => t.teamID === teamID);
 
-        const players = team.players;
-        players.forEach(playerID => {
-            const player = this.playerController.FindPlayer(playerID)
+        if (team) {
+            team.teamPoints = 0;
 
-            player.killpoints = 0;
+            team.players.forEach(playerID => {
+                const player = this.playerController?.FindPlayer(playerID);
+                if (player) {
+                    player.killpoints = 0;
+                }
+            });
 
-        });
-
-        console.log('resetTeamPoints', team)
+            console.log(`Points reset for Team ${teamID}.`, team);
+        } else {
+            console.error(`Team with ID ${teamID} not found.`);
+        }
     }
-
-
-
-
-
 }
 
 module.exports = TeamController;

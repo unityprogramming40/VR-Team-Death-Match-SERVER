@@ -7,22 +7,38 @@ const GunsData = [
     new GunData(2, "none", 0, [0, 0, 0], [0, 0, 0], 12, 12, 15, 1)
 ];
 
-class GunController extends MainController{
+/**
+ * GunController manages gun-related operations and Socket.IO events.
+ */
+class GunController extends MainController {
+    /**
+     * @param {object} io - The Socket.IO instance.
+     */
     constructor(io) {
         super(io);
         this.initializeSocketEvents(io);
     }
 
+    /**
+     * Initializes Socket.IO event listeners.
+     * @param {object} io - The Socket.IO instance.
+     */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            //console.log('New client connected to GunController');
+            console.log('New client connected to GunController');
 
             socket.on('sendGunData', (data) => this.handleGunData(socket, this.createGunData(data)));
             socket.on('sendBulletData', (data) => this.handleBulletData(socket, this.createBulletData(data)));
-            socket.on('disconnect', () => console.log(''));
+
+            socket.on('disconnect', () => console.log('Client disconnected from GunController'));
         });
     }
 
+    /**
+     * Creates a new GunData instance from raw data.
+     * @param {object} data - The raw gun data.
+     * @returns {GunData} A new GunData instance.
+     */
     createGunData(data) {
         return new GunData(
             data.gunID,
@@ -37,10 +53,21 @@ class GunController extends MainController{
         );
     }
 
+    /**
+     * Creates a new BulletData instance from raw data.
+     * @param {object} data - The raw bullet data.
+     * @returns {BulletData} A new BulletData instance.
+     */
     createBulletData(data) {
         return new BulletData(data.gunID, data.playerID, data.teamID, data.damage);
     }
 
+    /**
+     * Finds a gun by its ID and applies an update function.
+     * @param {number} gunID - The ID of the gun to find.
+     * @param {Function} updateFn - The function to update the gun.
+     * @returns {GunData|null} The updated GunData instance, or null if not found.
+     */
     findAndUpdateGun(gunID, updateFn) {
         const gun = GunsData.find(g => g.gunID === gunID);
         if (gun) {
@@ -50,15 +77,28 @@ class GunController extends MainController{
         return null;
     }
 
+    /**
+     * Emits a socket event and logs a message based on success or failure.
+     * @param {object} socket - The client's socket instance.
+     * @param {string} event - The event name.
+     * @param {object} data - The data to emit.
+     * @param {string} successMessage - The message to log on success.
+     * @param {string} errorMessage - The message to log on failure.
+     */
     emitAndLog(socket, event, data, successMessage, errorMessage) {
         if (data) {
             socket.emit(event, data);
             console.log(successMessage);
         } else {
-            console.log(errorMessage);
+            console.error(errorMessage);
         }
     }
 
+    /**
+     * Handles incoming gun data updates or additions.
+     * @param {object} socket - The client's socket instance.
+     * @param {GunData} data - The GunData instance.
+     */
     handleGunData(socket, data) {
         console.log('Received Gun Data:', data);
 
@@ -74,26 +114,35 @@ class GunController extends MainController{
         };
 
         let gun = this.findAndUpdateGun(data.gunID, updateGunData);
+
         if (!gun) {
             gun = this.createGunData(data);
             GunsData.push(gun);
+            console.log(`Gun with ID ${data.gunID} added to GunsData.`);
+        } else {
+            console.log(`Gun with ID ${data.gunID} updated in GunsData.`);
         }
 
         this.emitAndLog(
             socket,
             'updateGunData',
             gun,
-            "Gun Data => updated successfully",
-            "Gun Data => not found, added new entry"
+            `Gun Data => updated successfully for gunID: ${data.gunID}`,
+            `Gun Data => could not find or create gunID: ${data.gunID}`
         );
     }
 
+    /**
+     * Handles incoming bullet data.
+     * @param {object} socket - The client's socket instance.
+     * @param {BulletData} bulletData - The BulletData instance.
+     */
     handleBulletData(socket, bulletData) {
         console.log('Received Bullet Data:', bulletData);
 
         // Process and broadcast bullet data if necessary
         socket.emit('updateBulletData', bulletData);
-        console.log("Bullet Data => processed and broadcasted");
+        console.log(`Bullet Data => processed and broadcasted for gunID: ${bulletData.gunID}`);
     }
 }
 

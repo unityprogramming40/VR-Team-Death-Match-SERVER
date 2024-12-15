@@ -5,8 +5,13 @@ const MainController = require('./mainController');
 
 const Players = [];
 
-
+/**
+ * PlayerController manages player-related operations and Socket.IO events.
+ */
 class PlayerController extends MainController {
+    /**
+     * @param {object} io - The Socket.IO instance.
+     */
     constructor(io) {
         super(io);
         this.teamController = null;
@@ -15,36 +20,56 @@ class PlayerController extends MainController {
         this.initializeSocketEvents(io);
     }
 
+    /**
+     * Initializes Socket.IO event listeners for player-related events.
+     * @param {object} io - The Socket.IO instance.
+     */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            console.log('New client connected to player controller');
-            ////////////////////////////////
-            socket.emit('NewConnect')
-            //////////////////////  
+            console.log('New client connected to PlayerController.');
+
+            // Emit initial data and setup events
+            socket.emit('NewConnect');
             this.SendAllPlayers(socket);
-            ////////////////////////////////
 
-            socket.on("playerConnect", (data) => { this.handlePlayerModel(socket, data) })
-
+            socket.on("playerConnect", (data) => this.handlePlayerModel(socket, data));
             socket.on('syncPlayerTransform', (data) => this.handlePlayerTransform(socket, data));
-
             socket.on('playerData', (data) => this.handlePlayerData(socket, data));
-
             socket.on('disconnect', () => this.handlePlayerDisconnect());
         });
     }
 
+    /**
+     * Sets the TeamController instance.
+     * @param {object} teamController - The TeamController instance.
+     */
     setTeamController(teamController) {
         this.teamController = teamController;
     }
 
+    /**
+     * Sends all players to the connected client.
+     * @param {object} socket - The client's socket instance.
+     */
     SendAllPlayers(socket) {
-        this.SendSocketEmit(socket, "otherPlayers", { Players: Players }, "Send Players", "failed Send Players")
+        this.SendSocketEmit(
+            socket,
+            "otherPlayers",
+            { Players: Players },
+            "Players sent successfully",
+            "Failed to send players"
+        );
     }
 
+    /**
+     * Finds and updates a player based on their ID.
+     * @param {object[]} players - The array of players.
+     * @param {string} playerID - The ID of the player to find.
+     * @param {Function} callBack - The callback function to apply updates.
+     * @returns {object|null} - The updated player or null if not found.
+     */
     findAndUpdatePlayer(players, playerID, callBack) {
         if (players.length > 0) {
-            this.Debug(players);
             const player = players.find(p => p.playerID === playerID);
             if (player) {
                 callBack(player);
@@ -54,29 +79,52 @@ class PlayerController extends MainController {
         return null;
     }
 
+    /**
+     * Finds a player by their ID.
+     * @param {string} playerID - The ID of the player to find.
+     * @returns {object|null} - The found player or null if not found.
+     */
     FindPlayer(playerID) {
-        const player = Players.find(p => p.playerID === playerID);
-        if (player) {
-            return player;
-        }
-        return null;
+        return Players.find(p => p.playerID === playerID) || null;
     }
 
+    /**
+     * Handles player connection and model creation.
+     * @param {object} socket - The client's socket instance.
+     * @param {object} data - The player data.
+     */
     handlePlayerModel(socket, data) {
+        if (!data || !data.playerID) {
+            this.DebugError("Invalid player data received for playerConnect.");
+            return;
+        }
 
-        var player = this.FindPlayer(data.playerID);
+        let player = this.FindPlayer(data.playerID);
         if (!player) {
             player = new PlayerModel(data.playerID);
-            Players.push(this.player);
-            this.SendSocketBroadcast(socket, "newPlayerModel", player, "Send Player Model", "Failed Send Player model")
+            Players.push(player);
+            this.SendSocketBroadcast(
+                socket,
+                "newPlayerModel",
+                player,
+                "New player model sent successfully",
+                "Failed to send new player model"
+            );
         } else {
-            this.Debug("Player Exist")
+            this.Debug("Player already exists:", player.playerID);
         }
     }
 
-
+    /**
+     * Handles synchronization of player transforms.
+     * @param {object} socket - The client's socket instance.
+     * @param {object} data - The player transform data.
+     */
     handlePlayerTransform(socket, data) {
-        //console.log('Received Player Transform:', data);
+        if (!data || !data.playerID) {
+            this.DebugError("Invalid data received for syncPlayerTransform.");
+            return;
+        }
 
         const syncTransformCallBack = (player) => {
             player.headPosition = data.headPosition;
@@ -87,24 +135,31 @@ class PlayerController extends MainController {
             player.lHandRotation = data.lHandRotation;
         };
 
-        let player = this.findAndUpdatePlayer(Players, data.playerID, syncTransformCallBack);
+        const player = this.findAndUpdatePlayer(Players, data.playerID, syncTransformCallBack);
 
         if (player) {
-
             this.SendSocketBroadcast(
                 socket,
                 'syncPlayerTransform',
                 player,
-                "syncPlayerTransform => done",
-                "syncPlayerTransform => not found"
+                "Player transform synchronized successfully",
+                "Player transform synchronization failed"
             );
-
         } else {
-            this.DebugError("Sync Player Transfor Error")
+            this.DebugError("Player not found for transform synchronization.");
         }
     }
 
+    /**
+     * Handles updates to player data.
+     * @param {object} socket - The client's socket instance.
+     * @param {object} data - The player data.
+     */
     handlePlayerData(socket, data) {
+        if (!data || !data.playerID) {
+            this.DebugError("Invalid data received for playerData.");
+            return;
+        }
 
         const updatePlayerData = (player) => {
             player.name = data.name;
@@ -114,105 +169,28 @@ class PlayerController extends MainController {
             player.resetpointID = data.resetpointID;
         };
 
-        let player = this.findAndUpdatePlayer(Players, data.playerID, updatePlayerData);
+        const player = this.findAndUpdatePlayer(Players, data.playerID, updatePlayerData);
 
         if (player) {
-
             this.SendSocketBroadcast(
                 socket,
                 'updatePlayerData',
                 player,
-                "PlayerData => done",
-                "PlayerData => not found"
+                "Player data updated successfully",
+                "Failed to update player data"
             );
-            this.teamController.addPlayerToTeam(player.playerID, player.teamID);
+            this.teamController?.addPlayerToTeam(player.playerID, player.teamID);
+        } else {
+            this.DebugError("Player not found for data update.");
         }
-
-
-
     }
 
-
+    /**
+     * Handles player disconnection.
+     */
     handlePlayerDisconnect() {
-        console.log('Client disconnected from player controller')
+        console.log('Client disconnected from PlayerController.');
     }
-
-    /*
-    
-        handleHealthChange(socket, data) {
-            console.log('Received Player Health Change:', data);
-            this.handleCustomUpdate(
-                socket,
-                data,
-                'health',
-                'updatePlayerHealthChange',
-                "Player Health Changed => done",
-                "Player Health Changed => error wrong id"
-            );
-        }
-    
-    
-        handleResetPointChange(socket, data) {
-            console.log('Received Player Reset Point Change:', data);
-            this.handleCustomUpdate(
-                socket,
-                data,
-                'resetpointID',
-                'updatePlayerResetPointChange',
-                "Player Reset Point Changed => done",
-                "Player Reset Point Changed => error wrong id"
-            );
-        }
-    
-        handleAddKillPoint(socket, data) {
-            console.log('Received Player Add Kill Point:', data);
-    
-            const addKillPoint = (player) => {
-                player.killpoints += 1;
-            };
-    
-            const player = this.findAndUpdatePlayer(PlayersData, data.playerID, addKillPoint);
-            this.SendSocketEmit(
-                socket,
-                'updatePlayerAddKillPoint',
-                player,
-                "Player Add Kill Point => done",
-                "Player Add Kill Point => error wrong id"
-            );
-        }
-    
-        handleDataReset(socket, data) {
-            console.log('Received Player Data Reset:', data);
-    
-            const resetData = (player) => {
-                player.health = 100;
-                player.teamID = 0;
-                player.killpoints = 0;
-            };
-    
-            const player = this.findAndUpdatePlayer(PlayersData, data.playerID, resetData);
-            this.SendSocketEmit(
-                socket,
-                'playerDataReset',
-                player,
-                "Player Data Reset => done",
-                "Player Data Reset => error wrong id"
-            );
-        }
-    
-    
-        handleCustomUpdate(socket, data, field, event, successMessage, errorMessage) {
-            const updateField = (player) => {
-                player[field] = data.intValue;
-            };
-    
-            const player = this.findAndUpdatePlayer(PlayersData, data.playerID, updateField);
-            this.SendSocketEmit(socket, event, player, successMessage, errorMessage);
-        }
-    */
-
-
-
 }
 
 module.exports = PlayerController;

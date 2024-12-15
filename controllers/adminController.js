@@ -8,8 +8,6 @@ class AdminController extends MainController {
     /**
      * AdminController handles admin-related events via Socket.IO.
      * @param {object} io - The Socket.IO instance.
-     * @param {object} playerControl - Reference to the PlayerController instance.
-     * @param {object} teamController - Reference to the TeamController instance.
      */
     constructor(io) {
         super(io);
@@ -21,19 +19,20 @@ class AdminController extends MainController {
         this.initializeSocketEvents(io);
     }
 
-    setGunController(gunController){
+    // Setter methods for controllers
+    setGunController(gunController) {
         this.gunController = gunController;
     }
 
-    setPlayerController(playerController){
+    setPlayerController(playerController) {
         this.playerController = playerController;
     }
 
-    setTeamController(teamController){
+    setTeamController(teamController) {
         this.teamController = teamController;
     }
 
-    setGameplayController(gameplayController){
+    setGameplayController(gameplayController) {
         this.gameplayController = gameplayController;
     }
 
@@ -43,156 +42,100 @@ class AdminController extends MainController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            //console.log('New client connected to admin controller');
-
+            console.log('New client connected to admin controller');
 
             socket.on('playerteamChange', (data) => this.handleTeamChange(socket, new TeamChange(data.playerID, data.newTeamID)));
             socket.on('playerNameChange', (data) => this.handlePlayerNameChange(socket, new PlayerNameChange(data.playerID, data.playerName)));
             socket.on('changePosition', (data) => this.handleChangePosition(socket, new ChangePosition(data.id, data.position)));
             socket.on('integerValue', (data) => this.handleIntegerValue(socket, new IntegerValue(data.idValue)));
 
-            socket.on('disconnect', () => console.log(''));
+            socket.on('disconnect', () => console.log('Client disconnected from admin controller'));
         });
     }
-
 
     /**
      * Handles player name change requests.
      * @param {object} socket - The client's socket instance.
-     * @param {object} playerNameChange - The PlayerNameChange instance.
+     * @param {PlayerNameChange} playerNameChange - The PlayerNameChange instance.
      */
     handlePlayerNameChange(socket, playerNameChange) {
-        console.log('ON-Received Player Name Change:', playerNameChange);
+        console.log('Received Player Name Change:', playerNameChange);
 
-        const player = this.playerController.FindPlayer(playerNameChange.playerID);
+        const player = this.playerController?.FindPlayer(playerNameChange.playerID);
 
         if (player) {
             player.name = playerNameChange.playerName;
-
-            // Broadcast the updated player name
             socket.emit('updatePlayerName', playerNameChange);
-
-            console.log("Player Name Change processed successfully.");
+            console.log(`Player Name Change processed successfully: ${playerNameChange.playerName}`);
         } else {
-            console.error(`Player ID ${playerNameChange.playerID} not found.`);
-            socket.emit('playerNameChangeError', { error: `Player ID ${playerNameChange.playerID} not found.` });
+            const error = `Player ID ${playerNameChange.playerID} not found.`;
+            console.error(error);
+            socket.emit('playerNameChangeError', { error });
         }
     }
 
     /**
-     * Handles team change requests and updates the teams array.
+     * Handles team change requests.
      * @param {object} socket - The client's socket instance.
-     * @param {object} teamChange - The TeamChange instance.
+     * @param {TeamChange} teamChange - The TeamChange instance.
      */
     handleTeamChange(socket, teamChange) {
-        console.log('ON-Received Team Change:', teamChange);
-    
-        // Validate input
+        console.log('Received Team Change:', teamChange);
+
         if (!teamChange.playerID || typeof teamChange.newTeamID !== 'number') {
-            console.error('Invalid team change data:', teamChange);
-            socket.emit('teamChangeError', { error: 'Invalid team change data.' });
+            const error = 'Invalid team change data.';
+            console.error(error, teamChange);
+            socket.emit('teamChangeError', { error });
             return;
         }
 
+        const player = this.playerController?.FindPlayer(teamChange.playerID);
 
-        const player = this.playerController.FindPlayer(teamChange.playerID);//get old player team
-    
         if (player) {
-            const oldTeamID = player.teamID; 
-    
-            // Check if player exists in the current team
-            const teamPlayers = this.teamController.getTeams().find(team => team.teamID === oldTeamID).players;
+            const oldTeamID = player.teamID;
+            const teamPlayers = this.teamController?.getTeams()?.find(team => team.teamID === oldTeamID)?.players || [];
 
             if (!teamPlayers.includes(player.playerID)) {
-                console.error(`Player ${player.playerID} not found in Team ${oldTeamID}.`);
-                socket.emit('teamChangeError', { error: `Player ${player.playerID} not found in Team ${oldTeamID}.` });
+                const error = `Player ${player.playerID} not found in Team ${oldTeamID}.`;
+                console.error(error);
+                socket.emit('teamChangeError', { error });
                 return;
             }
-    
-            // Proceed with team change
+
             player.teamID = teamChange.newTeamID;
-    
-            // Update teams array
-            this.teamController.removePlayerFromTeam(player.playerID, oldTeamID);
-            this.teamController.addPlayerToTeam(player.playerID, teamChange.newTeamID);
-    
-            console.log(`Player ${player.playerID} moved from Team ${oldTeamID} to Team ${player.teamID}.`);
-    
-            // Broadcast the change
-            this.io.emit('updateTeamChange', {
-                playerID: player.playerID,
-                oldTeamID,
-                newTeamID: player.teamID
-            });
-    
-            // Acknowledge success
-            socket.emit('teamChangeSuccess', {
-                message: `Player ${player.playerID} successfully moved to Team ${player.teamID}.`
-            });
-        } else {
-            console.error(`Player ID ${teamChange.playerID} not found.`);
-            socket.emit('teamChangeError', { error: `Player ID ${teamChange.playerID} not found.` });
-        }
-    }
-    
+            this.teamController?.removePlayerFromTeam(player.playerID, oldTeamID);
+            this.teamController?.addPlayerToTeam(player.playerID, teamChange.newTeamID);
 
-    /**
-     * Adds a player to the specified team.
-     * @param {string} playerID - The ID of the player to add.
-     * @param {number} teamID - The ID of the team.
-     */
-    addPlayerToTeam(playerID, teamID) {
-        console.log('ON-addPlayerToTeam:', playerID, teamID);
-        const team = this.teams.find(t => t.teamID === teamID);
-        if (team) {
-            team.players.push(playerID);
-            console.log(`Player ${playerID} added to ${team.teamName}.`);
+            console.log(`Player ${player.playerID} moved from Team ${oldTeamID} to Team ${teamChange.newTeamID}.`);
+            this.io.emit('updateTeamChange', { playerID: player.playerID, oldTeamID, newTeamID: teamChange.newTeamID });
+            socket.emit('teamChangeSuccess', { message: `Player ${player.playerID} successfully moved to Team ${teamChange.newTeamID}.` });
         } else {
-            console.error(`Team ID ${teamID} not found.`);
-        }
-    }
-
-    /**
-     * Removes a player from their current team.
-     * @param {string} playerID - The ID of the player to remove.
-     * @param {number} teamID - The ID of the team.
-     */
-    removePlayerFromTeam(playerID, teamID) {
-        console.log('ON-removePlayerFromTeam:', playerID, teamID);
-        
-        const team = this.teams.find(t => t.teamID === teamID);
-        if (team) {
-            team.players = team.players.filter(id => id !== playerID);
-            console.log(`Player ${playerID} removed from ${team.teamName}.`);
-        } else {
-            console.error(`Team ID ${teamID} not found.`);
+            const error = `Player ID ${teamChange.playerID} not found.`;
+            console.error(error);
+            socket.emit('teamChangeError', { error });
         }
     }
 
     /**
      * Handles position change requests.
      * @param {object} socket - The client's socket instance.
-     * @param {object} changePosition - The ChangePosition instance.
+     * @param {ChangePosition} changePosition - The ChangePosition instance.
      */
     handleChangePosition(socket, changePosition) {
-        console.log('ON-Received Change Position:', changePosition);
-
-        // Broadcast the position change event
+        console.log('Received Change Position:', changePosition);
         socket.emit('updateChangePosition', changePosition);
-        console.log("Position Change proccesed and broadcasted.");
+        console.log('Position Change processed and broadcasted.');
     }
 
     /**
      * Handles integer value updates.
      * @param {object} socket - The client's socket instance.
-     * @param {object} integerValue - The IntegerValue instance.
+     * @param {IntegerValue} integerValue - The IntegerValue instance.
      */
     handleIntegerValue(socket, integerValue) {
         console.log('Received Integer Value:', integerValue);
-
-        // Broadcast the integer value update
         this.io.emit('updateIntegerValue', integerValue);
-        console.log("Integer Value processed and broadcasted.");
+        console.log('Integer Value processed and broadcasted.');
     }
 }
 
