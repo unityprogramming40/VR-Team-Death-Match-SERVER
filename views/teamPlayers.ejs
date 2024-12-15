@@ -6,10 +6,10 @@
     <title>Team Players</title>
 </head>
 <body>
-    <h1>Players</h1>
+    <h1>Teams</h1>
     <hr />
 
-    <h2>Team 1 Players</h2>
+    <h2><%= teams[0].teamName %> Players</h2>
     <ul>
         <% teams[0].players.forEach(player => { %>
             <li><%= player %></li>
@@ -17,9 +17,9 @@
     </ul>
     <hr />
 
-    <h2>Team 2 Players</h2>
+    <h2><%= teams[1].teamName %> Players</h2>
     <ul>
-        <% teams[0].players.forEach(player => { %>
+        <% teams[1].players.forEach(player => { %>
             <li><%= player %></li>
         <% }); %>
     </ul>

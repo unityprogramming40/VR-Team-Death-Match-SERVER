@@ -2,8 +2,9 @@ const TeamChange = require('../models/admin/TeamChange');
 const PlayerNameChange = require('../models/admin/PlayerNameChange');
 const ChangePosition = require('../models/admin/ChangePosition');
 const IntegerValue = require('../models/admin/IntegerValue');
+const MainController = require('./mainController');
 
-class AdminController {
+class AdminController extends MainController {
     /**
      * AdminController handles admin-related events via Socket.IO.
      * @param {object} io - The Socket.IO instance.
@@ -11,7 +12,7 @@ class AdminController {
      * @param {object} teamController - Reference to the TeamController instance.
      */
     constructor(io) {
-        this.io = io;
+        super(io);
         this.gunController = null;
         this.playerController = null;
         this.teamController = null;
@@ -42,7 +43,7 @@ class AdminController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            console.log('New client connected to admin controller');
+            //console.log('New client connected to admin controller');
 
 
             socket.on('playerteamChange', (data) => this.handleTeamChange(socket, new TeamChange(data.playerID, data.newTeamID)));
@@ -50,7 +51,7 @@ class AdminController {
             socket.on('changePosition', (data) => this.handleChangePosition(socket, new ChangePosition(data.id, data.position)));
             socket.on('integerValue', (data) => this.handleIntegerValue(socket, new IntegerValue(data.idValue)));
 
-            socket.on('disconnect', () => console.log('Client disconnected from admin controller'));
+            socket.on('disconnect', () => console.log(''));
         });
     }
 

@@ -1,8 +1,10 @@
 const http = require('http');
 const socketIo = require('socket.io');
 const expressApp = require('./app'); // ملف إعدادات Express
+
 const teamRoutes = require('./routes/teamRoutes'); // ملف المسارات
 const playersRoutes = require('./routes/playersRoutes');
+const gameplayRoutes = require('./routes/gameplayRoutes');
 
 // Import controllers
 const GunController = require('./controllers/gunController');
@@ -10,7 +12,6 @@ const AdminController = require('./controllers/adminController');
 const PlayerController = require('./controllers/playerController');
 const GameplayController = require('./controllers/gameplayController');
 const TeamController = require('./controllers/teamController');
-const gameplayRoutes = require('./routes/gameplayRoutes');
 
 // إعداد Express
 const app = expressApp();

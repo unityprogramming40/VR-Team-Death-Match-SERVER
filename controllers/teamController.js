@@ -1,14 +1,17 @@
 const TeamData = require('../models/team/TeamData');
+const MainController = require('./mainController');
 
 
-class TeamController {
+class TeamController extends MainController{
     /**
      * AdminController handles admin-related events via Socket.IO.
      * @param {object} io - The Socket.IO instance.
      * @param {object} playerControl - Reference to the PlayerController instance.
      */
+    
     constructor(io) {
-        this.io = io;
+        super(io);
+
         this.playerControl = null;
 
         // Initialize teams
@@ -30,12 +33,13 @@ class TeamController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            console.log('New client connected to admin controller');
+            //console.log('New client connected to admin controller');
 
             //
             socket.on('getTeams', () => this.sendTeams(socket));
+            socket.on('renameTeam', (data) => this.RenameTeam(socket, data));
 
-            socket.on('disconnect', () => console.log('Client disconnected from admin controller'));
+            socket.on('disconnect', () => console.log(''));
         });
     }
 
@@ -43,7 +47,7 @@ class TeamController {
 
     sendTeams(socket) {
         try {
-            console.log('ON-Received Get Teams');
+            //console.log('ON-Received Get Teams');
 
             socket.emit('Teams', { team: this.teams });
 
@@ -57,16 +61,35 @@ class TeamController {
     }
 
 
+
+    RenameTeam(socket, data) {
+        const team = this.teams.find(t => t.teamID === data.iValue);
+        if (data) {
+            if (team) {
+                team.teamName = data.sID;
+                console.log('RenamedTeam', team)
+                
+            } else {
+                console.error('Team is Null')
+            }
+        } else {
+            console.error('Data is Null')
+
+        }
+
+
+    }
+
     addPlayerToTeam(playerID, teamID) {
 
         const team = this.teams.find(team => team.teamID === teamID);
-        
+
         if (team) {
             if (team.players.includes(playerID)) {
                 console.log(`Player ${playerID} is already in Team ${teamID}`);
             } else {
                 team.players.push(playerID);
-                console.log('addPlayerTeam', this.teams);
+                console.log('addPlayerTeam', team);
             }
         } else {
             console.error(`Team ${teamID} does not exist.`);
@@ -95,16 +118,25 @@ class TeamController {
         const team = this.teams.find(teamID);
 
         team.teamPoints++;
-        console.log('addTeamPoint', team)
+        console.log('addedTeamPoint', team)
     }
 
-    resetPoints() {
-        this.resetTeamPoints();
+    resetTeamPoints(teamID) {
+        const team = this.teams.find(teamID);
+        team.teamPoints = 0;
+
+        const players = team.players;
+        players.forEach(playerID => {
+            const player = this.playerController.FindPlayer(playerID)
+
+            player.killpoints = 0;
+
+        });
+
+        console.log('resetTeamPoints', team)
     }
 
-    resetTeamPoints() {
-        this.team1Killpoints = 0;
-    }
+
 
 
 

@@ -1,12 +1,13 @@
 const GameData = require('../models/gameplay/GameData');
+const MainController = require('./mainController');
 
-class GameplayController {
+class GameplayController extends MainController {
     constructor(io) {
-        this.io = io;
+        super(io);
         this.gameData = new GameData();
 
         io.on('connection', (socket) => {
-            console.log('New client connected to gameplay controller');
+            //console.log('New client connected to gameplay controller');
 
             socket.on('getGameData', () => {
                 socket.emit('GameData', { gameData: this.gameData });
@@ -65,7 +66,7 @@ class GameplayController {
             });
 
             socket.on('disconnect', () => {
-                console.log('Client disconnected from gameplay controller');
+                console.log('');
             });
         });
     }

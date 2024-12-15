@@ -1,71 +1,84 @@
 const PlayerTransform = require('../models/player/PlayerTransform');
 const PlayerData = require('../models/player/PlayerData');
+const PlayerModel = require('../models/player/PlayerModel');
+const MainController = require('./mainController');
 
-const PlayersData = [];
+const Players = [];
 
-const PlayersTransform = [];
 
-class PlayerController {
+class PlayerController extends MainController {
     constructor(io) {
-        this.io = io;
+        super(io);
         this.teamController = null;
+        super.admin = true;
+
         this.initializeSocketEvents(io);
+    }
+
+    initializeSocketEvents(io) {
+        io.on('connection', (socket) => {
+            console.log('New client connected to player controller');
+            ////////////////////////////////
+            socket.emit('NewConnect')
+            //////////////////////  
+            this.SendAllPlayers(socket);
+            ////////////////////////////////
+
+            socket.on("playerConnect", (data) => { this.handlePlayerModel(socket, data) })
+
+            socket.on('syncPlayerTransform', (data) => this.handlePlayerTransform(socket, data));
+
+            socket.on('playerData', (data) => this.handlePlayerData(socket, data));
+
+            socket.on('disconnect', () => this.handlePlayerDisconnect());
+        });
     }
 
     setTeamController(teamController) {
         this.teamController = teamController;
     }
 
-    initializeSocketEvents(io) {
-        io.on('connection', (socket) => {
-            console.log('New client connected to player controller');
-
-            //////////////////////////////////
-            socket.emit('NewConnect');
-            ////////////////////////////////
-
-            socket.on('playerTransform', (data) => this.handlePlayerTransform(socket, data));
-            socket.on('playerData', (data) => this.handlePlayerData(socket, this.createPlayerData(data)));
-            socket.on('disconnect', () => console.log('Client disconnected from player controller'));
-        });
+    SendAllPlayers(socket) {
+        this.SendSocketEmit(socket, "otherPlayers", { Players: Players }, "Send Players", "failed Send Players")
     }
 
-    createPlayerData(data) {
-        return new PlayerData(data.playerID, data.name, data.health, data.teamID, data.killpoints, data.resetpointID);
-    }
-
-    findAndUpdatePlayer(players, playerID, updateFn) {
-        const player = players.find(p => p.playerID === playerID);
-        if (player) {
-            updateFn(player);
-            return player;
+    findAndUpdatePlayer(players, playerID, callBack) {
+        if (players.length > 0) {
+            this.Debug(players);
+            const player = players.find(p => p.playerID === playerID);
+            if (player) {
+                callBack(player);
+                return player;
+            }
         }
         return null;
     }
 
-    
-     FindPlayer(playerID) {
-        const player = PlayersData.find(p => p.playerID === playerID);
+    FindPlayer(playerID) {
+        const player = Players.find(p => p.playerID === playerID);
         if (player) {
             return player;
         }
         return null;
     }
 
-    emitAndLog(socket, event, data, successMessage, errorMessage) {
-        if (data) {
-            socket.emit(event, data);
+    handlePlayerModel(socket, data) {
 
-            console.log(successMessage);
+        var player = this.FindPlayer(data.playerID);
+        if (!player) {
+            player = new PlayerModel(data.playerID);
+            Players.push(this.player);
+            this.SendSocketBroadcast(socket, "newPlayerModel", player, "Send Player Model", "Failed Send Player model")
         } else {
-            console.log(errorMessage);
+            this.Debug("Player Exist")
         }
     }
+
 
     handlePlayerTransform(socket, data) {
-        console.log('Received Player Transform:', data);
+        //console.log('Received Player Transform:', data);
 
-        const updateTransform = (player) => {
+        const syncTransformCallBack = (player) => {
             player.headPosition = data.headPosition;
             player.headRotation = data.headRotation;
             player.rHandPosition = data.rHandPosition;
@@ -74,31 +87,24 @@ class PlayerController {
             player.lHandRotation = data.lHandRotation;
         };
 
-        let player = this.findAndUpdatePlayer(PlayersTransform, data.playerID, updateTransform);
-        if (!player) {
-            player = new PlayerTransform(
-                data.playerID,
-                data.headPosition,
-                data.headRotation,
-                data.rHandPosition,
-                data.rHandRotation,
-                data.lHandPosition,
-                data.lHandRotation
-            );
-            PlayersTransform.push(player);
-        }
+        let player = this.findAndUpdatePlayer(Players, data.playerID, syncTransformCallBack);
 
-        this.emitAndLog(
-            socket,
-            'updatePlayerTransform',
-            player,
-            "PlayerTransform => done",
-            "PlayerTransform => not found"
-        );
+        if (player) {
+
+            this.SendSocketBroadcast(
+                socket,
+                'syncPlayerTransform',
+                player,
+                "syncPlayerTransform => done",
+                "syncPlayerTransform => not found"
+            );
+
+        } else {
+            this.DebugError("Sync Player Transfor Error")
+        }
     }
 
     handlePlayerData(socket, data) {
-        console.log('Received Player Data:', data);
 
         const updatePlayerData = (player) => {
             player.name = data.name;
@@ -108,103 +114,105 @@ class PlayerController {
             player.resetpointID = data.resetpointID;
         };
 
-        let player = this.findAndUpdatePlayer(PlayersData, data.playerID, updatePlayerData);
-        if (!player) {
-            player = this.createPlayerData(data);
+        let player = this.findAndUpdatePlayer(Players, data.playerID, updatePlayerData);
 
-            PlayersData.push(player);
-            console.log(player.playerID,player.teamID)
-            this.teamController.addPlayerToTeam(player.playerID,player.teamID);
+        if (player) {
 
+            this.SendSocketBroadcast(
+                socket,
+                'updatePlayerData',
+                player,
+                "PlayerData => done",
+                "PlayerData => not found"
+            );
+            this.teamController.addPlayerToTeam(player.playerID, player.teamID);
         }
 
 
-        this.emitAndLog(
-            socket,
-            'updatePlayerData',
-            player,
-            "PlayerData => done",
-            "PlayerData => not found"
-        );
-    }
 
-    handleCustomUpdate(socket, data, field, event, successMessage, errorMessage) {
-        const updateField = (player) => {
-            player[field] = data.intValue;
-        };
-
-        const player = this.findAndUpdatePlayer(PlayersData, data.playerID, updateField);
-        this.emitAndLog(socket, event, player, successMessage, errorMessage);
-    }
-
-    handleHealthChange(socket, data) {
-        console.log('Received Player Health Change:', data);
-        this.handleCustomUpdate(
-            socket,
-            data,
-            'health',
-            'updatePlayerHealthChange',
-            "Player Health Changed => done",
-            "Player Health Changed => error wrong id"
-        );
     }
 
 
-    handleResetPointChange(socket, data) {
-        console.log('Received Player Reset Point Change:', data);
-        this.handleCustomUpdate(
-            socket,
-            data,
-            'resetpointID',
-            'updatePlayerResetPointChange',
-            "Player Reset Point Changed => done",
-            "Player Reset Point Changed => error wrong id"
-        );
+    handlePlayerDisconnect() {
+        console.log('Client disconnected from player controller')
     }
 
-    handleAddKillPoint(socket, data) {
-        console.log('Received Player Add Kill Point:', data);
+    /*
+    
+        handleHealthChange(socket, data) {
+            console.log('Received Player Health Change:', data);
+            this.handleCustomUpdate(
+                socket,
+                data,
+                'health',
+                'updatePlayerHealthChange',
+                "Player Health Changed => done",
+                "Player Health Changed => error wrong id"
+            );
+        }
+    
+    
+        handleResetPointChange(socket, data) {
+            console.log('Received Player Reset Point Change:', data);
+            this.handleCustomUpdate(
+                socket,
+                data,
+                'resetpointID',
+                'updatePlayerResetPointChange',
+                "Player Reset Point Changed => done",
+                "Player Reset Point Changed => error wrong id"
+            );
+        }
+    
+        handleAddKillPoint(socket, data) {
+            console.log('Received Player Add Kill Point:', data);
+    
+            const addKillPoint = (player) => {
+                player.killpoints += 1;
+            };
+    
+            const player = this.findAndUpdatePlayer(PlayersData, data.playerID, addKillPoint);
+            this.SendSocketEmit(
+                socket,
+                'updatePlayerAddKillPoint',
+                player,
+                "Player Add Kill Point => done",
+                "Player Add Kill Point => error wrong id"
+            );
+        }
+    
+        handleDataReset(socket, data) {
+            console.log('Received Player Data Reset:', data);
+    
+            const resetData = (player) => {
+                player.health = 100;
+                player.teamID = 0;
+                player.killpoints = 0;
+            };
+    
+            const player = this.findAndUpdatePlayer(PlayersData, data.playerID, resetData);
+            this.SendSocketEmit(
+                socket,
+                'playerDataReset',
+                player,
+                "Player Data Reset => done",
+                "Player Data Reset => error wrong id"
+            );
+        }
+    
+    
+        handleCustomUpdate(socket, data, field, event, successMessage, errorMessage) {
+            const updateField = (player) => {
+                player[field] = data.intValue;
+            };
+    
+            const player = this.findAndUpdatePlayer(PlayersData, data.playerID, updateField);
+            this.SendSocketEmit(socket, event, player, successMessage, errorMessage);
+        }
+    */
 
-        const addKillPoint = (player) => {
-            player.killpoints += 1;
-        };
 
-        const player = this.findAndUpdatePlayer(PlayersData, data.playerID, addKillPoint);
-        this.emitAndLog(
-            socket,
-            'updatePlayerAddKillPoint',
-            player,
-            "Player Add Kill Point => done",
-            "Player Add Kill Point => error wrong id"
-        );
-    }
 
-    handleDataReset(socket, data) {
-        console.log('Received Player Data Reset:', data);
-
-        const resetData = (player) => {
-            player.health = 100;
-            player.teamID = 0;
-            player.killpoints = 0;
-        };
-
-        const player = this.findAndUpdatePlayer(PlayersData, data.playerID, resetData);
-        this.emitAndLog(
-            socket,
-            'playerDataReset',
-            player,
-            "Player Data Reset => done",
-            "Player Data Reset => error wrong id"
-        );
-    }
-
-    getPlayersData(){
-        return PlayersData;
-    }
-
-    getPlayersTransform(){
-        return PlayersTransform;
-    }
 }
 
 module.exports = PlayerController;

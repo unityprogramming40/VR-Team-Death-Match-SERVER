@@ -1,24 +1,25 @@
 const GunData = require('../models/gun/GunData');
 const BulletData = require('../models/gun/BulletData');
+const MainController = require('./mainController');
 
 const GunsData = [
     new GunData(1, "none", 0, [0, 0, 0], [0, 0, 0], 30, 30, 7, 2),
     new GunData(2, "none", 0, [0, 0, 0], [0, 0, 0], 12, 12, 15, 1)
 ];
 
-class GunController {
+class GunController extends MainController{
     constructor(io) {
-        this.io = io;
+        super(io);
         this.initializeSocketEvents(io);
     }
 
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            console.log('New client connected to GunController');
+            //console.log('New client connected to GunController');
 
             socket.on('sendGunData', (data) => this.handleGunData(socket, this.createGunData(data)));
             socket.on('sendBulletData', (data) => this.handleBulletData(socket, this.createBulletData(data)));
-            socket.on('disconnect', () => console.log('Client disconnected from GunController'));
+            socket.on('disconnect', () => console.log(''));
         });
     }
 
