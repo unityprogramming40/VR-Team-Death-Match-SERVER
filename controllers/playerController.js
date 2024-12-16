@@ -30,6 +30,7 @@ class PlayerController extends MainController {
 
             // Emit initial data and setup events
             socket.emit('NewConnect');
+
             this.SendAllPlayers(socket);
 
             socket.on("playerConnect", (data) => this.handlePlayerModel(socket, data));
@@ -97,7 +98,7 @@ class PlayerController extends MainController {
      * @param {object} data - The player data.
      */
     handlePlayerModel(socket, data) {
-        const playerID = data.sID;
+        const playerID = data.playerID;
         if (!data || !playerID) {
             this.DebugError("Invalid player data received for playerConnect.");
             return;
@@ -107,6 +108,7 @@ class PlayerController extends MainController {
         if (!player) {
             player = new PlayerModel(playerID);
             Players.push(player);
+            this.SendSocketEmit(socket,"mainPlayer",player,"man player model sent successfully","Failed to send main player model")
             this.SendSocketBroadcast(
                 socket,
                 "newPlayerModel",

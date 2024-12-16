@@ -38,7 +38,8 @@ class TeamController extends MainController {
         io.on('connection', (socket) => {
             this.Debug('New client connected to TeamController.');
 
-            socket.on('getTeams', () => this.sendTeams(socket));
+            this.sendTeams(socket);
+
             socket.on('renameTeam', (data) => this.renameTeam(socket, data));
 
             socket.on('disconnect', () => console.log('Client disconnected from TeamController.'));
