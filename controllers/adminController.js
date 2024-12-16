@@ -42,7 +42,7 @@ class AdminController extends MainController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            console.log('New client connected to admin controller');
+            this.Debug('New client connected to admin controller');
 
             socket.on('playerteamChange', (data) => this.handleTeamChange(socket, new TeamChange(data.playerID, data.newTeamID)));
             socket.on('playerNameChange', (data) => this.handlePlayerNameChange(socket, new PlayerNameChange(data.playerID, data.playerName)));
@@ -59,17 +59,18 @@ class AdminController extends MainController {
      * @param {PlayerNameChange} playerNameChange - The PlayerNameChange instance.
      */
     handlePlayerNameChange(socket, playerNameChange) {
-        console.log('Received Player Name Change:', playerNameChange);
+        this.Debug('Received Player Name Change:', playerNameChange);
 
         const player = this.playerController?.FindPlayer(playerNameChange.playerID);
 
         if (player) {
-            player.name = playerNameChange.playerName;
-            socket.emit('updatePlayerName', playerNameChange);
-            console.log(`Player Name Change processed successfully: ${playerNameChange.playerName}`);
+            player.playerData.name = playerNameChange.playerName;
+            this.SendSocketEmit('updatePlayerName', playerNameChange);
+            this.SendSocketBroadcast('updatePlayerName', playerNameChange);
+            this.Debug(`Player Name Change processed successfully: ${playerNameChange.playerName}`);
         } else {
             const error = `Player ID ${playerNameChange.playerID} not found.`;
-            console.error(error);
+            this.DebugError(error);
             socket.emit('playerNameChangeError', { error });
         }
     }
@@ -84,7 +85,7 @@ class AdminController extends MainController {
 
         if (!teamChange.playerID || typeof teamChange.newTeamID !== 'number') {
             const error = 'Invalid team change data.';
-            console.error(error, teamChange);
+            this.DebugError(error, teamChange);
             socket.emit('teamChangeError', { error });
             return;
         }
@@ -92,26 +93,26 @@ class AdminController extends MainController {
         const player = this.playerController?.FindPlayer(teamChange.playerID);
 
         if (player) {
-            const oldTeamID = player.teamID;
+            const oldTeamID = player.playerData.teamID;
             const teamPlayers = this.teamController?.getTeams()?.find(team => team.teamID === oldTeamID)?.players || [];
 
             if (!teamPlayers.includes(player.playerID)) {
                 const error = `Player ${player.playerID} not found in Team ${oldTeamID}.`;
-                console.error(error);
+                this.DebugError(error);
                 socket.emit('teamChangeError', { error });
                 return;
             }
 
-            player.teamID = teamChange.newTeamID;
+            player.playerData.teamID = teamChange.newTeamID;
             this.teamController?.removePlayerFromTeam(player.playerID, oldTeamID);
             this.teamController?.addPlayerToTeam(player.playerID, teamChange.newTeamID);
 
-            console.log(`Player ${player.playerID} moved from Team ${oldTeamID} to Team ${teamChange.newTeamID}.`);
+            this.Debug(`Player ${player.playerID} moved from Team ${oldTeamID} to Team ${teamChange.newTeamID}.`);
             this.io.emit('updateTeamChange', { playerID: player.playerID, oldTeamID, newTeamID: teamChange.newTeamID });
             socket.emit('teamChangeSuccess', { message: `Player ${player.playerID} successfully moved to Team ${teamChange.newTeamID}.` });
         } else {
             const error = `Player ID ${teamChange.playerID} not found.`;
-            console.error(error);
+            this.DebugError(error);
             socket.emit('teamChangeError', { error });
         }
     }

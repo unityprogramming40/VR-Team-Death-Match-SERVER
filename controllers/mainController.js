@@ -1,3 +1,5 @@
+const Logger = require("../models/Logger/Logger");
+
 /**
  * MainController handles socket communication and logging in the application.
  */
@@ -7,6 +9,8 @@ class MainController {
      */
     constructor(io) {
         this.io = io;
+        this.logger = new Logger();
+
     }
 
     /**
@@ -43,7 +47,8 @@ class MainController {
      * @param {string} message - The debug message to log.
      */
     Debug(message) {
-        console.log(`[DEBUG]: ${message}`);
+        //this.logger.Debug(message);
+        console.log(message)
     }
 
     /**
@@ -51,7 +56,9 @@ class MainController {
      * @param {string} message - The error message to log.
      */
     DebugError(message) {
-        console.error(`[ERROR]: ${message}`);
+        //this.logger.DebugError(message);
+        console.error(message)
+
     }
 
     /**

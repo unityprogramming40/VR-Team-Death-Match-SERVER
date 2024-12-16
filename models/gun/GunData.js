@@ -25,6 +25,7 @@ class GunData {
         damage = 10,
         resetPoint = [0, 0, 0]
     } = {}) {
+        /*
         if (typeof gunID !== 'number' || !Number.isInteger(gunID)) {
             throw new TypeError("gunID must be an integer.");
         }
@@ -52,7 +53,7 @@ class GunData {
         if (!Array.isArray(resetPoint) || !this.isValidFloatArray(resetPoint)) {
             throw new TypeError("resetPoint must be an array of numbers (floats).");
         }
-
+*/
         this.gunID = gunID;
         this.playerID = playerID;
         this.teamID = teamID;

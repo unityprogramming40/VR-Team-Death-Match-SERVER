@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Players Data</title>
+</head>
+<body>
+    <h1>Data</h1>
+    <hr />
+
+    <% players.forEach(player => { %>
+        <div>
+            <h2>Player ID: <%= player.playerID %></h2>
+            <p><strong>Name :</strong> <%= player.playerData.name %></p>
+            <p><strong>Health :</strong> <%= player.playerData.health %></p>
+            <p><strong>Team ID :</strong> <%= player.playerData.teamID %></p>
+            <p><strong>Kill Points :</strong> <%= player.playerData.killpoints %></p>
+            <p><strong>Reset Point ID :</strong> <%= player.playerData.resetpointID %></p>
+        </div>
+        <div>
+            <p><strong>headPosition :</strong> <%= player.playerTransform.headPosition.join(", ") %></p>
+            <p><strong>headRotation :</strong> <%= player.playerTransform.headRotation.join(", ") %></p>
+            <p><strong>rHandPosition :</strong> <%= player.playerTransform.rHandPosition.join(", ") %></p>
+            <p><strong>rHandRotation :</strong> <%= player.playerTransform.rHandRotation.join(", ") %></p>
+            <p><strong>lHandPosition :</strong> <%= player.playerTransform.lHandPosition.join(", ") %></p>
+            <p><strong>lHandRotation :</strong> <%= player.playerTransform.lHandRotation.join(", ") %></p>
+        </div>
+        <hr />
+    <% }); %>
+
+</body>
+</html>

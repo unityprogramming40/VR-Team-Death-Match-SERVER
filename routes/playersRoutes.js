@@ -5,15 +5,10 @@ module.exports = (playerController) => {
 
 
     router.get('/data', (req, res) => {
-        const playersData = playerController.getPlayersData(); 
-        res.render('playersData', { playersData }); 
+        const players = playerController.getAllPlayers(); 
+        res.render('playersModel', { players }); 
     });
     
-
-    router.get('/transform', (req, res) => {
-        const playersTransform = playerController.getPlayersTransform();
-        res.render('playersTransform', { playersTransform });
-    });
 
     return router;
 };

@@ -1,4 +1,4 @@
-const TeamData = require('../models/team/TeamData');
+const TeamData = require('../models/team/teamData');
 const MainController = require('./mainController');
 
 /**
@@ -36,7 +36,7 @@ class TeamController extends MainController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            console.log('New client connected to TeamController.');
+            this.Debug('New client connected to TeamController.');
 
             socket.on('getTeams', () => this.sendTeams(socket));
             socket.on('renameTeam', (data) => this.renameTeam(socket, data));
@@ -51,10 +51,10 @@ class TeamController extends MainController {
      */
     sendTeams(socket) {
         try {
-            console.log('Sending team data to client.');
-            socket.emit('Teams', { teams: this.teams });
+            this.Debug('Sending teamss data to client.');
+            socket.emit('Teams', { Teams: this.teams });
         } catch (error) {
-            console.error('Error in sendTeams:', error);
+            this.DebugError('Error in sendTeams:', error);
         }
     }
 
@@ -73,16 +73,16 @@ class TeamController extends MainController {
      */
     renameTeam(socket, data) {
         if (!data || typeof data.iValue !== 'number' || typeof data.sID !== 'string') {
-            console.error('Invalid data received for renameTeam:', data);
+            this.DebugError('Invalid data received for renameTeam:', data);
             return;
         }
 
         const team = this.teams.find(t => t.teamID === data.iValue);
         if (team) {
             team.teamName = data.sID;
-            console.log(`Renamed Team ${data.iValue} to "${data.sID}".`, team);
+            this.Debug(`Renamed Team ${data.iValue} to "${data.sID}".`, team);
         } else {
-            console.error(`Team with ID ${data.iValue} not found.`);
+            this.DebugError(`Team with ID ${data.iValue} not found.`);
         }
     }
 
@@ -96,13 +96,13 @@ class TeamController extends MainController {
 
         if (team) {
             if (team.players.includes(playerID)) {
-                console.log(`Player ${playerID} is already in Team ${teamID}.`);
+                this.Debug(`Player ${playerID} is already in Team ${teamID}.`);
             } else {
                 team.players.push(playerID);
-                console.log(`Player ${playerID} added to Team ${teamID}.`, team);
+                this.Debug(`Player ${playerID} added to Team ${teamID}.`, team);
             }
         } else {
-            console.error(`Team with ID ${teamID} not found.`);
+            this.DebugError(`Team with ID ${teamID} not found.`);
         }
     }
 
@@ -117,12 +117,12 @@ class TeamController extends MainController {
         if (team) {
             if (team.players.includes(playerID)) {
                 team.players = team.players.filter(id => id !== playerID);
-                console.log(`Player ${playerID} removed from Team ${teamID}.`, team);
+                this.Debug(`Player ${playerID} removed from Team ${teamID}.`, team);
             } else {
-                console.error(`Player ${playerID} not found in Team ${teamID}.`);
+                this.DebugError(`Player ${playerID} not found in Team ${teamID}.`);
             }
         } else {
-            console.error(`Team with ID ${teamID} not found.`);
+            this.DebugError(`Team with ID ${teamID} not found.`);
         }
     }
 
@@ -135,9 +135,9 @@ class TeamController extends MainController {
 
         if (team) {
             team.teamPoints++;
-            console.log(`Point added to Team ${teamID}. Current points: ${team.teamPoints}.`, team);
+            this.Debug(`Point added to Team ${teamID}. Current points: ${team.teamPoints}.`, team);
         } else {
-            console.error(`Team with ID ${teamID} not found.`);
+            this.DebugError(`Team with ID ${teamID} not found.`);
         }
     }
 
@@ -158,9 +158,9 @@ class TeamController extends MainController {
                 }
             });
 
-            console.log(`Points reset for Team ${teamID}.`, team);
+            this.Debug(`Points reset for Team ${teamID}.`, team);
         } else {
-            console.error(`Team with ID ${teamID} not found.`);
+            this.DebugError(`Team with ID ${teamID} not found.`);
         }
     }
 }

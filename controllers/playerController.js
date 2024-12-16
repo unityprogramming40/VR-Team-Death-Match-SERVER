@@ -26,15 +26,18 @@ class PlayerController extends MainController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            console.log('New client connected to PlayerController.');
+            this.Debug('New client connected to PlayerController.');
 
             // Emit initial data and setup events
             socket.emit('NewConnect');
             this.SendAllPlayers(socket);
 
             socket.on("playerConnect", (data) => this.handlePlayerModel(socket, data));
+
             socket.on('syncPlayerTransform', (data) => this.handlePlayerTransform(socket, data));
+            
             socket.on('playerData', (data) => this.handlePlayerData(socket, data));
+
             socket.on('disconnect', () => this.handlePlayerDisconnect());
         });
     }
@@ -94,14 +97,15 @@ class PlayerController extends MainController {
      * @param {object} data - The player data.
      */
     handlePlayerModel(socket, data) {
-        if (!data || !data.playerID) {
+        const playerID = data.sID;
+        if (!data || !playerID) {
             this.DebugError("Invalid player data received for playerConnect.");
             return;
         }
 
-        let player = this.FindPlayer(data.playerID);
+        let player = this.FindPlayer(playerID);
         if (!player) {
-            player = new PlayerModel(data.playerID);
+            player = new PlayerModel(playerID);
             Players.push(player);
             this.SendSocketBroadcast(
                 socket,
@@ -110,8 +114,11 @@ class PlayerController extends MainController {
                 "New player model sent successfully",
                 "Failed to send new player model"
             );
+
+            this.teamController?.addPlayerToTeam(player.playerID, player.playerData.teamID);
+
         } else {
-            this.Debug("Player already exists:", player.playerID);
+            this.Debug("Player already exists:", player.playerTransform.playerID);
         }
     }
 
@@ -127,12 +134,12 @@ class PlayerController extends MainController {
         }
 
         const syncTransformCallBack = (player) => {
-            player.headPosition = data.headPosition;
-            player.headRotation = data.headRotation;
-            player.rHandPosition = data.rHandPosition;
-            player.rHandRotation = data.rHandRotation;
-            player.lHandPosition = data.lHandPosition;
-            player.lHandRotation = data.lHandRotation;
+            player.playerTransform.headPosition = data.headPosition;
+            player.playerTransform.headRotation = data.headRotation;
+            player.playerTransform.rHandPosition = data.rHandPosition;
+            player.playerTransform.rHandRotation = data.rHandRotation;
+            player.playerTransform.lHandPosition = data.lHandPosition;
+            player.playerTransform.lHandRotation = data.lHandRotation;
         };
 
         const player = this.findAndUpdatePlayer(Players, data.playerID, syncTransformCallBack);
@@ -141,7 +148,7 @@ class PlayerController extends MainController {
             this.SendSocketBroadcast(
                 socket,
                 'syncPlayerTransform',
-                player,
+                player.playerTransform,
                 "Player transform synchronized successfully",
                 "Player transform synchronization failed"
             );
@@ -162,11 +169,11 @@ class PlayerController extends MainController {
         }
 
         const updatePlayerData = (player) => {
-            player.name = data.name;
-            player.health = data.health;
-            player.teamID = data.teamID;
-            player.killpoints = data.killpoints;
-            player.resetpointID = data.resetpointID;
+            player.playerData.name = data.name;
+            player.playerData.health = data.health;
+            player.playerData.teamID = data.teamID;
+            player.playerData.killpoints = data.killpoints;
+            player.playerData.resetpointID = data.resetpointID;
         };
 
         const player = this.findAndUpdatePlayer(Players, data.playerID, updatePlayerData);
@@ -175,14 +182,17 @@ class PlayerController extends MainController {
             this.SendSocketBroadcast(
                 socket,
                 'updatePlayerData',
-                player,
+                player.playerData,
                 "Player data updated successfully",
                 "Failed to update player data"
             );
-            this.teamController?.addPlayerToTeam(player.playerID, player.teamID);
         } else {
             this.DebugError("Player not found for data update.");
         }
+    }
+
+    getAllPlayers() {
+        return Players;
     }
 
     /**
