@@ -2,8 +2,8 @@ const PlayerTransform = require('../models/player/PlayerTransform');
 const PlayerData = require('../models/player/PlayerData');
 const PlayerModel = require('../models/player/PlayerModel');
 const MainController = require('./mainController');
+const TeamController = require('./teamController');
 
-const Players = [];
 
 /**
  * PlayerController manages player-related operations and Socket.IO events.
@@ -14,6 +14,10 @@ class PlayerController extends MainController {
      */
     constructor(io) {
         super(io);
+
+        this.Players = [];
+
+
         this.teamController = null;
         super.admin = true;
 
@@ -36,16 +40,16 @@ class PlayerController extends MainController {
             socket.on("playerConnect", (data) => this.handlePlayerModel(socket, data));
 
             socket.on('syncPlayerTransform', (data) => this.handlePlayerTransform(socket, data));
-            
+
             socket.on('playerData', (data) => this.handlePlayerData(socket, data));
 
-            socket.on('disconnect', () => this.handlePlayerDisconnect());
+            socket.on('disconnect', () => this.handlePlayerDisconnect(socket));
         });
     }
 
     /**
      * Sets the TeamController instance.
-     * @param {object} teamController - The TeamController instance.
+     * @param {TeamController} teamController - The TeamController instance.
      */
     setTeamController(teamController) {
         this.teamController = teamController;
@@ -59,7 +63,7 @@ class PlayerController extends MainController {
         this.SendSocketEmit(
             socket,
             "otherPlayers",
-            { Players: Players },
+            { Players: this.Players },
             "Players sent successfully",
             "Failed to send players"
         );
@@ -89,7 +93,7 @@ class PlayerController extends MainController {
      * @returns {object|null} - The found player or null if not found.
      */
     FindPlayer(playerID) {
-        return Players.find(p => p.playerID === playerID) || null;
+        return this.Players.find(p => p.playerID === playerID) || null;
     }
 
     /**
@@ -98,7 +102,7 @@ class PlayerController extends MainController {
      * @param {object} data - The player data.
      */
     handlePlayerModel(socket, data) {
-        const playerID = data.playerID;
+        const playerID = socket.id
         if (!data || !playerID) {
             this.DebugError("Invalid player data received for playerConnect.");
             return;
@@ -107,8 +111,10 @@ class PlayerController extends MainController {
         let player = this.FindPlayer(playerID);
         if (!player) {
             player = new PlayerModel(playerID);
-            Players.push(player);
-            this.SendSocketEmit(socket,"mainPlayer",player,"man player model sent successfully","Failed to send main player model")
+            this.Players.push(player);
+
+
+            this.SendSocketEmit(socket, "mainPlayer", player, "man player model sent successfully", "Failed to send main player model")
             this.SendSocketBroadcast(
                 socket,
                 "newPlayerModel",
@@ -144,7 +150,7 @@ class PlayerController extends MainController {
             player.playerTransform.lHandRotation = data.lHandRotation;
         };
 
-        const player = this.findAndUpdatePlayer(Players, data.playerID, syncTransformCallBack);
+        const player = this.findAndUpdatePlayer(this.Players, data.playerID, syncTransformCallBack);
 
         if (player) {
             this.SendSocketBroadcast(
@@ -178,7 +184,7 @@ class PlayerController extends MainController {
             player.playerData.resetpointID = data.resetpointID;
         };
 
-        const player = this.findAndUpdatePlayer(Players, data.playerID, updatePlayerData);
+        const player = this.findAndUpdatePlayer(this.Players, data.playerID, updatePlayerData);
 
         if (player) {
             this.SendSocketBroadcast(
@@ -194,15 +200,30 @@ class PlayerController extends MainController {
     }
 
     getAllPlayers() {
-        return Players;
+        return this.Players;
     }
 
     /**
      * Handles player disconnection.
      */
-    handlePlayerDisconnect() {
-        console.log('Client disconnected from PlayerController.');
+    handlePlayerDisconnect(socket) {
+        const PID = socket.id
+        const player = this.FindPlayer(PID)
+
+        if (player) {
+
+            this.teamController.removePlayerFromTeam(PID, player.playerData.teamID)
+
+            this.Players = this.Players.filter(player => player.playerID !== PID)
+
+            this.SendSocketBroadcast(socket, "playerDisconnect", player.playerData, "Player Disconnect Succesfully", "Player Disconnect Failed")
+
+            this.Debug('Player disconnected..' + PID);
+        } else {
+            this.DebugError("Player Nulll || Admin Disconnect...");
+        }
     }
 }
+
 
 module.exports = PlayerController;

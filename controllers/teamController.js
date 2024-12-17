@@ -36,13 +36,12 @@ class TeamController extends MainController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            this.Debug('New client connected to TeamController.');
 
             this.sendTeams(socket);
 
             socket.on('renameTeam', (data) => this.renameTeam(socket, data));
 
-            socket.on('disconnect', () => console.log('Client disconnected from TeamController.'));
+            // socket.on('disconnect', () => console.log('Client disconnected from TeamController.'));
         });
     }
 
@@ -52,8 +51,7 @@ class TeamController extends MainController {
      */
     sendTeams(socket) {
         try {
-            this.Debug('Sending teamss data to client.');
-            socket.emit('Teams', { Teams: this.teams });
+            this.SendSocketEmit(socket, 'Teams', { Teams: this.teams }, "Teams Sent to Client", "Failed Send Teams");
         } catch (error) {
             this.DebugError('Error in sendTeams:', error);
         }

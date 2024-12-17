@@ -11,36 +11,10 @@ class MainController {
         this.io = io;
         this.logger = new Logger();
 
+        this.admin = false;
     }
 
-    /**
-     * @type {string|null} Static player ID, shared across all instances of MainController.
-     */
-    static playerId = null;
 
-    /**
-     * @type {boolean} Indicates if the current instance has admin privileges.
-     */
-    static admin = false;
-
-    /**
-     * Sets the static player ID.
-     * @param {string|null} id - The player ID to set.
-     */
-    static setPlayerId(id) {
-        if (typeof id !== 'string' && id !== null) {
-            throw new TypeError('playerId must be a string or null.');
-        }
-        this.playerId = id;
-    }
-
-    /**
-     * Gets the static player ID.
-     * @returns {string|null} The player ID.
-     */
-    getPlayerId() {
-        return MainController.playerId;
-    }
 
     /**
      * Logs a debug message to the console.

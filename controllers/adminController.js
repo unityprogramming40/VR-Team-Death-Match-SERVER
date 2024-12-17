@@ -42,14 +42,13 @@ class AdminController extends MainController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            this.Debug('New client connected to admin controller');
 
             socket.on('playerteamChange', (data) => this.handleTeamChange(socket, new TeamChange(data.playerID, data.newTeamID)));
             socket.on('playerNameChange', (data) => this.handlePlayerNameChange(socket, new PlayerNameChange(data.playerID, data.playerName)));
             socket.on('changePosition', (data) => this.handleChangePosition(socket, new ChangePosition(data.id, data.position)));
             socket.on('integerValue', (data) => this.handleIntegerValue(socket, new IntegerValue(data.idValue)));
 
-            socket.on('disconnect', () => console.log('Client disconnected from admin controller'));
+            //socket.on('disconnect', () => console.log('Client disconnected from admin controller'));
         });
     }
 

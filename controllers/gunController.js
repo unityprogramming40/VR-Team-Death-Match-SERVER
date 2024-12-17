@@ -25,12 +25,12 @@ class GunController extends MainController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            console.log('New client connected to GunController');
+            //console.log('New client connected to GunController');
 
             socket.on('sendGunData', (data) => this.handleGunData(socket, this.createGunData(data)));
             socket.on('sendBulletData', (data) => this.handleBulletData(socket, this.createBulletData(data)));
 
-            socket.on('disconnect', () => console.log('Client disconnected from GunController'));
+            //socket.on('disconnect', () => console.log('Client disconnected from GunController'));
         });
     }
 

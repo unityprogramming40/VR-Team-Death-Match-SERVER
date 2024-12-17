@@ -24,13 +24,11 @@ class GameplayController extends MainController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            console.log('New client connected to GameplayController.');
+            //console.log('New client connected to GameplayController.');
 
             // Send current game data to the client
-            socket.on('getGameData', () => {
-                socket.emit('GameData', { gameData: this.gameData });
-                console.log('GameData sent to client.');
-            });
+            this.SendSocketEmit(socket, 'GameData', { gameData: this.gameData }, "Game Data Sent ", "Failed send Game Data");
+
 
             // Start the game
             socket.on('startGame', (data) => {
@@ -107,9 +105,9 @@ class GameplayController extends MainController {
             */
 
             // Handle client disconnection
-            socket.on('disconnect', () => {
-                console.log('Client disconnected from GameplayController.');
-            });
+            // socket.on('disconnect', () => {
+            //     console.log('Client disconnected from GameplayController.');
+            // });
         });
     }
 }
