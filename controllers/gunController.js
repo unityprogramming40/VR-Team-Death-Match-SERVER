@@ -28,7 +28,7 @@ class GunController extends MainController {
             //console.log('New client connected to GunController');
 
             socket.on('sendGunData', (data) => this.handleGunData(socket, this.createGunData(data)));
-            socket.on('sendBulletData', (data) => this.handleBulletData(socket, this.createBulletData(data)));
+            socket.on('playerShoot', (data) => this.handlePlayerShoot(socket, data));
 
             //socket.on('disconnect', () => console.log('Client disconnected from GunController'));
         });
@@ -78,23 +78,6 @@ class GunController extends MainController {
     }
 
     /**
-     * Emits a socket event and logs a message based on success or failure.
-     * @param {object} socket - The client's socket instance.
-     * @param {string} event - The event name.
-     * @param {object} data - The data to emit.
-     * @param {string} successMessage - The message to log on success.
-     * @param {string} errorMessage - The message to log on failure.
-     */
-    emitAndLog(socket, event, data, successMessage, errorMessage) {
-        if (data) {
-            socket.emit(event, data);
-            console.log(successMessage);
-        } else {
-            console.error(errorMessage);
-        }
-    }
-
-    /**
      * Handles incoming gun data updates or additions.
      * @param {object} socket - The client's socket instance.
      * @param {GunData} data - The GunData instance.
@@ -137,12 +120,12 @@ class GunController extends MainController {
      * @param {object} socket - The client's socket instance.
      * @param {BulletData} bulletData - The BulletData instance.
      */
-    handleBulletData(socket, bulletData) {
+    handlePlayerShoot(socket, bulletData) {
         console.log('Received Bullet Data:', bulletData);
 
-        // Process and broadcast bullet data if necessary
-        socket.emit('updateBulletData', bulletData);
-        console.log(`Bullet Data => processed and broadcasted for gunID: ${bulletData.gunID}`);
+        this.SendSocketEmit(socket,'playerShoot', bulletData,"Player Shoot"+bulletData.playerID,"Player Shoot Failed");
+        this.SendSocketBroadcast(socket,'playerShoot', bulletData,"Player Shoot"+bulletData.playerID,"Player Shoot Failed");
+
     }
 }
 

@@ -41,7 +41,10 @@ class PlayerController extends MainController {
 
             socket.on('syncPlayerTransform', (data) => this.handlePlayerTransform(socket, data));
 
-            socket.on('playerData', (data) => this.handlePlayerData(socket, data));
+
+           // socket.on('playerData', (data) => this.handlePlayerData(socket, data));
+
+
 
             socket.on('disconnect', () => this.handlePlayerDisconnect(socket));
         });
@@ -170,6 +173,7 @@ class PlayerController extends MainController {
      * @param {object} socket - The client's socket instance.
      * @param {object} data - The player data.
      */
+    /*
     handlePlayerData(socket, data) {
         if (!data || !data.playerID) {
             this.DebugError("Invalid data received for playerData.");
@@ -197,7 +201,7 @@ class PlayerController extends MainController {
         } else {
             this.DebugError("Player not found for data update.");
         }
-    }
+    }*/
 
     getAllPlayers() {
         return this.Players;
@@ -216,9 +220,8 @@ class PlayerController extends MainController {
 
             this.Players = this.Players.filter(player => player.playerID !== PID)
 
-            this.SendSocketBroadcast(socket, "playerDisconnect", player.playerData, "Player Disconnect Succesfully", "Player Disconnect Failed")
+            this.SendSocketBroadcast(socket, "playerDisconnect", player.playerData, "Player Disconnect Succesfully.." + PID, "Player Disconnect Failed")
 
-            this.Debug('Player disconnected..' + PID);
         } else {
             this.DebugError("Player Nulll || Admin Disconnect...");
         }
