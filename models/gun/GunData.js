@@ -12,19 +12,18 @@ class GunData {
      * @param {number} [options.maxBullets=30] - The maximum number of bullets the gun can hold. Defaults to 30.
      * @param {number} [options.currentBullets=30] - The current number of bullets in the gun. Defaults to 30.
      * @param {number} [options.damage=10] - The damage dealt by the gun. Defaults to 10.
-     * @param {number[]} [options.resetPoint=[0, 0, 0]] - The reset position of the gun as an array of floats. Defaults to [0, 0, 0].
+     * @param {number} [options.resetPoint=0] - The reset position of the gun as an array of floats. Defaults to [0, 0, 0].
      */
-    constructor({
-        gunID,
-        playerID = "none",
-        teamID = 0,
-        position = [0, 0, 0],
-        rotation = [0, 0, 0],
-        maxBullets = 30,
-        currentBullets = 30,
-        damage = 10,
-        resetPoint = [0, 0, 0]
-    } = {}) {
+    constructor(gunID, playerID, teamID, position, rotation, maxBullets, currentBullets, damage, resetPoint) {
+        this.gunID = gunID;
+        this.playerID = playerID;
+        this.teamID = teamID;
+        this.position = position;
+        this.rotation = rotation;
+        this.maxBullets = maxBullets;
+        this.currentBullets = currentBullets;
+        this.damage = damage;
+        this.resetPoint = resetPoint;
         /*
         if (typeof gunID !== 'number' || !Number.isInteger(gunID)) {
             throw new TypeError("gunID must be an integer.");
@@ -54,15 +53,7 @@ class GunData {
             throw new TypeError("resetPoint must be an array of numbers (floats).");
         }
 */
-        this.gunID = gunID;
-        this.playerID = playerID;
-        this.teamID = teamID;
-        this.position = position;
-        this.rotation = rotation;
-        this.maxBullets = maxBullets;
-        this.currentBullets = currentBullets;
-        this.damage = damage;
-        this.resetPoint = resetPoint;
+
     }
 
     /**

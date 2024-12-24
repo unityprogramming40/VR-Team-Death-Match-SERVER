@@ -41,7 +41,7 @@ class PlayerController extends MainController {
 
             socket.on('syncPlayerTransform', (data) => this.handlePlayerTransform(socket, data));
 
-
+            socket.on("playerDamage",(data)=>this.handleHealthChange(socket,data));
            // socket.on('playerData', (data) => this.handlePlayerData(socket, data));
 
 
@@ -224,6 +224,22 @@ class PlayerController extends MainController {
 
         } else {
             this.DebugError("Player Nulll || Admin Disconnect...");
+        }
+    }
+
+    handleHealthChange(socket, data){
+        this.Debug('Received Player Health Change:', data);
+
+        const player = this.FindPlayer(data.playerID);
+
+        if (player) {
+            player.playerData.health -= data.damage;
+            this.SendSocketBroadcast(socket,'updatePlayerHealth', data,'Player Health Change successfully','Player Health Change Failded');
+            this.Debug(`Player Health Change processed successfully: ${data.playerID}`);
+        } else {
+            const error = `Player ID ${data.playerID} not found.`;
+            this.DebugError(error);
+            socket.emit('playerHealthChangeError', { error });
         }
     }
 }
