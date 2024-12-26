@@ -35,17 +35,20 @@ class Logger {
             this.logHistory[key] = 1;
         }
 
-        // Display logs (collapsed by default)
-        console.clear(); // Clear the console for a clean view
+        // Display logs (collapsed view with counts for duplicates)
+        console.clear();
         console.groupCollapsed(`${level} Logs (${Object.keys(this.logHistory).length} unique)`);
         Object.entries(this.logHistory).forEach(([logMessage, count]) => {
             console.log(`${logMessage}${count > 1 ? ` (x${count})` : ""}`);
         });
         console.groupEnd();
     }
-}/*
+}
 
 // Example Usage
+// 
+/*
+const logger = new Logger();
 logger.Debug("System initialized");
 logger.Debug("System initialized");
 logger.Debug("Loading configuration");
@@ -53,5 +56,4 @@ logger.DebugError("File not found");
 logger.DebugError("File not found");
 logger.DebugError("File not found");
 */
-
 module.exports = Logger;

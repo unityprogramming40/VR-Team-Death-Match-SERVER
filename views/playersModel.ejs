@@ -19,12 +19,12 @@
             <p><strong>Reset Point ID :</strong> <%= player.playerData.resetpointID %></p>
         </div>
         <div>
-            <p><strong>headPosition :</strong> <%= player.playerTransform.headPosition.join(", ") %></p>
-            <p><strong>headRotation :</strong> <%= player.playerTransform.headRotation.join(", ") %></p>
-            <p><strong>rHandPosition :</strong> <%= player.playerTransform.rHandPosition.join(", ") %></p>
-            <p><strong>rHandRotation :</strong> <%= player.playerTransform.rHandRotation.join(", ") %></p>
-            <p><strong>lHandPosition :</strong> <%= player.playerTransform.lHandPosition.join(", ") %></p>
-            <p><strong>lHandRotation :</strong> <%= player.playerTransform.lHandRotation.join(", ") %></p>
+            <p><strong>headPosition :</strong> <%= player.playerTransform.headTranform.Position.join(", ") %></p>
+            <p><strong>headRotation :</strong> <%= player.playerTransform.headTranform.Rotation.join(", ") %></p>
+            <p><strong>rHandPosition :</strong> <%= player.playerTransform.rHandTransform.Position.join(", ") %></p>
+            <p><strong>rHandRotation :</strong> <%= player.playerTransform.rHandTransform.Rotation.join(", ") %></p>
+            <p><strong>lHandPosition :</strong> <%= player.playerTransform.lHandTransform.Position.join(", ") %></p>
+            <p><strong>lHandRotation :</strong> <%= player.playerTransform.lHandTransform.Rotation.join(", ") %></p>
         </div>
         <hr />
     <% }); %>

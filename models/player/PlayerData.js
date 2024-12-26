@@ -30,6 +30,15 @@ class PlayerData {
         this.killpoints = killpoints;
         this.resetpointID = resetpointID;
     }
+
+    AddKillpoint() {
+        this.killpoints += 1;
+    }
+
+
+    RestKillpoint() {
+        this.killpoints = 0;
+    }
 }
 
 module.exports = PlayerData;

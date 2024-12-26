@@ -35,23 +35,15 @@ class MainController {
 
     }
 
-    /**
-     * Emits a socket event to a specific socket connection.
-     * @param {object} socket - The socket connection to emit the event to.
-     * @param {string} event - The event name.
-     * @param {object} data - The data to send with the event.
-     * @param {string} [successMessage] - A message to log on successful emit.
-     * @param {string} [errorMessage] - A message to log on failure.
-     */
-    SendSocketEmit(socket, event, data, successMessage = '', errorMessage = '') {
+    SendSocketEmit(socket, event, data, successMessage = '', errorMessage = '', logSuccess = true) {
         if (data) {
             socket.emit(event, data);
-            if (successMessage) this.Debug(successMessage);
+            if (logSuccess && successMessage) this.Debug(successMessage);
         } else if (errorMessage) {
             this.DebugError(errorMessage);
         }
     }
-
+    
     /**
      * Broadcasts a socket event to all connections except the sender.
      * @param {object} socket - The socket connection initiating the broadcast.
@@ -59,15 +51,36 @@ class MainController {
      * @param {object} data - The data to send with the event.
      * @param {string} [successMessage] - A message to log on successful broadcast.
      * @param {string} [errorMessage] - A message to log on failure.
+     * @param {boolean} [logSuccess=true] - Whether to log the success message.
      */
-    SendSocketBroadcast(socket, event, data, successMessage = '', errorMessage = '') {
+    SendSocketBroadcast(socket, event, data, successMessage = '', errorMessage = '', logSuccess = true) {
         if (data) {
             socket.broadcast.emit(event, data);
-            if (successMessage) this.Debug(successMessage);
+            if (logSuccess && successMessage) this.Debug(successMessage);
         } else if (errorMessage) {
             this.DebugError(errorMessage);
         }
     }
+    
+    /**
+     * Sends a socket event to all connections, including the sender.
+     * @param {object} socket - The socket connection initiating the broadcast.
+     * @param {string} event - The event name.
+     * @param {object} data - The data to send with the event.
+     * @param {string} [successMessage] - A message to log on successful broadcast.
+     * @param {string} [errorMessage] - A message to log on failure.
+     * @param {boolean} [logSuccess=true] - Whether to log the success message.
+     */
+    SendSocketALL(socket, event, data, successMessage = '', errorMessage = '', logSuccess = true) {
+        if (data) {
+            socket.emit(event, data);
+            socket.broadcast.emit(event, data);
+            if (logSuccess && successMessage) this.Debug(successMessage);
+        } else if (errorMessage) {
+            this.DebugError(errorMessage);
+        }
+    }
+    
 }
 
 module.exports = MainController;

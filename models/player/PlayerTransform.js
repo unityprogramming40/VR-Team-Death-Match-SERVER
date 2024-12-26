@@ -1,24 +1,22 @@
+const TransformJSON = require("../TransformJSON");
+
 class PlayerTransform {
 /**
  * Represents a player in a 3D space with positional and rotational data.
  *
  * @param {string} playerID - The unique ID of the player.
- * @param {number[]} headPosition - The position of the player's head as an array of numbers.
- * @param {number[]} headRotation - The rotation of the player's head as an array of numbers.
- * @param {number[]} rHandPosition - The position of the player's right hand as an array of numbers.
- * @param {number[]} rHandRotation - The rotation of the player's right hand as an array of numbers.
- * @param {number[]} lHandPosition - The position of the player's left hand as an array of numbers.
- * @param {number[]} lHandRotation - The rotation of the player's left hand as an array of numbers.
- */
-    constructor(playerID, headPosition, headRotation, rHandPosition, rHandRotation, lHandPosition, lHandRotation) {
+ * @param {TransformJSON}  headTranform 
+ * @param {TransformJSON}  rHandTransform 
+ * @param {TransformJSON}  lHandTransform 
+
+*/
+    constructor(playerID, headTranform,  rHandTransform,  lHandTransform) {
        
         this.playerID = playerID;
-        this.headPosition = headPosition;
-        this.headRotation = headRotation;
-        this.rHandPosition = rHandPosition;
-        this.rHandRotation = rHandRotation;
-        this.lHandPosition = lHandPosition;
-        this.lHandRotation = lHandRotation;
+
+        this.headTranform = headTranform;
+        this.rHandTransform = rHandTransform;
+        this.lHandTransform = lHandTransform;
     }
 
 

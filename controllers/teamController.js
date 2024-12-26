@@ -14,7 +14,7 @@ class TeamController extends MainController {
         this.playerController = null;
 
         // Initialize teams
-        this.teams = [
+        this.Teams = [
             new TeamData(1, 'Team Alpha', 0, []),
             new TeamData(2, 'Team Bravo', 0, [])
         ];
@@ -41,7 +41,7 @@ class TeamController extends MainController {
 
             socket.on('renameTeam', (data) => this.renameTeam(socket, data));
 
-            // socket.on('disconnect', () => console.log('Client disconnected from TeamController.'));
+            // socket.on('disconnect', () => this.Debug('Client disconnected from TeamController.'));
         });
     }
 
@@ -51,7 +51,7 @@ class TeamController extends MainController {
      */
     sendTeams(socket) {
         try {
-            this.SendSocketEmit(socket, 'Teams', { Teams: this.teams }, "Teams Sent to Client", "Failed Send Teams");
+            this.SendSocketEmit(socket, 'Teams', { Teams: this.Teams }, "Teams Sent to Client", "Failed Send Teams");
         } catch (error) {
             this.DebugError('Error in sendTeams:', error);
         }
@@ -62,7 +62,11 @@ class TeamController extends MainController {
      * @returns {TeamData[]} The list of teams.
      */
     getTeams() {
-        return this.teams;
+        return this.Teams;
+    }
+ 
+    FindTeam(teamID) {
+        return this.Teams.find(t=>t.teamID==teamID);
     }
 
     /**
@@ -76,7 +80,7 @@ class TeamController extends MainController {
             return;
         }
 
-        const team = this.teams.find(t => t.teamID === data.iValue);
+        const team = this.FindTeam(data.iValue);
         if (team) {
             team.teamName = data.sID;
             this.Debug(`Renamed Team ${data.iValue} to "${data.sID}".`, team);
@@ -91,7 +95,7 @@ class TeamController extends MainController {
      * @param {number} teamID - The ID of the team.
      */
     addPlayerToTeam(playerID, teamID) {
-        const team = this.teams.find(t => t.teamID === teamID);
+        const team = this.FindTeam(teamID);
 
         if (team) {
             if (team.players.includes(playerID)) {
@@ -100,6 +104,7 @@ class TeamController extends MainController {
                 team.players.push(playerID);
                 this.Debug(`Player ${playerID} added to Team ${teamID}.`, team);
             }
+            
         } else {
             this.DebugError(`Team with ID ${teamID} not found.`);
         }
@@ -111,7 +116,7 @@ class TeamController extends MainController {
      * @param {number} teamID - The ID of the team.
      */
     removePlayerFromTeam(playerID, teamID) {
-        const team = this.teams.find(t => t.teamID === teamID);
+        const team = this.FindTeam(teamID);
 
         if (team) {
             if (team.players.includes(playerID)) {
@@ -130,7 +135,7 @@ class TeamController extends MainController {
      * @param {number} teamID - The ID of the team.
      */
     addTeamPoint(teamID) {
-        const team = this.teams.find(t => t.teamID === teamID);
+        const team = this.FindTeam(teamID);
 
         if (team) {
             team.teamPoints++;
@@ -145,7 +150,7 @@ class TeamController extends MainController {
      * @param {number} teamID - The ID of the team.
      */
     resetTeamPoints(teamID) {
-        const team = this.teams.find(t => t.teamID === teamID);
+        const team = this.FindTeam(teamID);
 
         if (team) {
             team.teamPoints = 0;

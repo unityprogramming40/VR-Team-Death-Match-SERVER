@@ -48,7 +48,7 @@ class AdminController extends MainController {
             socket.on('changePosition', (data) => this.handleChangePosition(socket, new ChangePosition(data.id, data.position)));
             socket.on('integerValue', (data) => this.handleIntegerValue(socket, new IntegerValue(data.idValue)));
 
-            //socket.on('disconnect', () => console.log('Client disconnected from admin controller'));
+
         });
     }
 
@@ -80,7 +80,7 @@ class AdminController extends MainController {
      * @param {TeamChange} teamChange - The TeamChange instance.
      */
     handleTeamChange(socket, teamChange) {
-        console.log('Received Team Change:', teamChange);
+        this.Debug('Received Team Change:', teamChange);
 
         if (!teamChange.playerID || typeof teamChange.newTeamID !== 'number') {
             const error = 'Invalid team change data.';
@@ -124,9 +124,9 @@ class AdminController extends MainController {
      * @param {ChangePosition} changePosition - The ChangePosition instance.
      */
     handleChangePosition(socket, changePosition) {
-        console.log('Received Change Position:', changePosition);
+        this.Debug('Received Change Position:', changePosition);
         socket.emit('updateChangePosition', changePosition);
-        console.log('Position Change processed and broadcasted.');
+        this.Debug('Position Change processed and broadcasted.');
     }
 
     /**
@@ -135,9 +135,9 @@ class AdminController extends MainController {
      * @param {IntegerValue} integerValue - The IntegerValue instance.
      */
     handleIntegerValue(socket, integerValue) {
-        console.log('Received Integer Value:', integerValue);
+        this.Debug('Received Integer Value:', integerValue);
         this.io.emit('updateIntegerValue', integerValue);
-        console.log('Integer Value processed and broadcasted.');
+        this.Debug('Integer Value processed and broadcasted.');
     }
 }
 

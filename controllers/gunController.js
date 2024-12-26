@@ -25,14 +25,14 @@ class GunController extends MainController {
      */
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
-            //console.log('New client connected to GunController');
+            //this.Debug('New client connected to GunController');
 
             this.SendSocketEmit(socket,'getGuns',{models : GunsData},'send guns sucessed','send guns failed');
 
             socket.on('sendGunData', (data) => this.handleGunData(socket, this.createGunData(data)));
             socket.on('playerShoot', (data) => this.handlePlayerShoot(socket, data));
 
-            //socket.on('disconnect', () => console.log('Client disconnected from GunController'));
+            //socket.on('disconnect', () => this.Debug('Client disconnected from GunController'));
         });
     }
 
@@ -85,7 +85,7 @@ class GunController extends MainController {
      * @param {GunData} data - The GunData instance.
      */
     handleGunData(socket, data) {
-        console.log('Received Gun Data:', data);
+        this.Debug('Received Gun Data:', data);
 
         const updateGunData = (gun) => {
             gun.playerID = data.playerID;
@@ -123,7 +123,7 @@ class GunController extends MainController {
      * @param {BulletData} bulletData - The BulletData instance.
      */
     handlePlayerShoot(socket, bulletData) {
-        console.log('Received Bullet Data:', bulletData);
+        this.Debug('Received Bullet Data:', bulletData);
 
         this.SendSocketEmit(socket,'playerShoot', bulletData,"Player Shoot: "+bulletData.playerID,"Player Shoot Failed");
         this.SendSocketBroadcast(socket,'playerShoot', bulletData,"Player Shoot: "+bulletData.playerID,"Player Shoot Failed");
