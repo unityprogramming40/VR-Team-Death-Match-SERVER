@@ -35,9 +35,17 @@ class Logger {
             this.logHistory[key] = 1;
         }
 
-        // Display logs (collapsed view with counts for duplicates)
-        console.clear();
-        console.groupCollapsed(`${level} Logs (${Object.keys(this.logHistory).length} unique)`);
+        // Display the entire log history without clearing
+        this._printLogs();
+    }
+
+    /**
+     * Prints the entire log history to the console.
+     * @private
+     */
+    _printLogs() {
+        console.clear(); // Clears the console for clean display
+        console.groupCollapsed("Log Summary:");
         Object.entries(this.logHistory).forEach(([logMessage, count]) => {
             console.log(`${logMessage}${count > 1 ? ` (x${count})` : ""}`);
         });
@@ -56,4 +64,5 @@ logger.DebugError("File not found");
 logger.DebugError("File not found");
 logger.DebugError("File not found");
 */
+
 module.exports = Logger;

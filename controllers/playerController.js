@@ -33,46 +33,54 @@ class PlayerController extends MainController {
 
             this.Debug('New client connected to PlayerController.');
 
-            this.StartConnect(socket);
+            this.SendSocketEmit(socket, "newConnect", { id: socket.id }, "Connected", "Failed");
 
-            socket.on('syncPlayerTransform', (data) => this.handlePlayerTransform(socket, data));
+            socket.on('Connected', (data) => this.StartConnect(socket, data));
 
-            socket.on("playerDamage", (data) => this.handleHealthChange(socket, data));
+
+            socket.on('syncPlayerTransform', (data) => this.handleSyncPlayerTransform(socket, data));
+
+            socket.on("playerDamage", (data) => this.handleDamagePlayer(socket, data));
+            socket.on("playerRevive", (data) => this.handleRevivePlayer(socket, data));
             // socket.on('playerData', (data) => this.handlePlayerData(socket, data));
-
-
 
             socket.on('disconnect', () => this.handlePlayerDisconnect(socket));
         });
     }
 
-    StartConnect(socket){
+    StartConnect(socket, data) {
 
         this.SendAllPlayers(socket);
 
+        if (data.playerID == "player") {
+            const playerID = socket.id
 
-        const playerID = socket.id
+            let player = this.FindPlayer(playerID);
+            if (!player) {
+                player = new PlayerModel(playerID);
+                this.Players.push(player);
 
-        let player = this.FindPlayer(playerID);
-        if (!player) {
-            player = new PlayerModel(playerID);
-            this.Players.push(player);
+                this.SendSocketEmit(socket, "PlayerSetUp", player,
+                    "new player created successfully",
+                    "Failed to send main player model"
+                );
+                this.SendSocketBroadcast(socket, "newPlayerConnected", player,
+                    "New player sent to Others successfully",
+                    "Failed to send new player model"
+                );
 
-            this.SendSocketEmit(socket, "NewConnect", player,
-                "new player model sent successfully",
-                "Failed to send main player model"
-            );
-            this.SendSocketBroadcast(socket, "newPlayerConnected", player,
-                "New player model sent successfully",
-                "Failed to send new player model"
-            );
+                this.teamController?.addPlayerToTeam(player.playerID, player.playerData.teamID);
 
-            this.teamController?.addPlayerToTeam(player.playerID, player.playerData.teamID);
+                this.Debug("Player Connect  ");
 
-            //////////////////////////////this.teamController.sendTeams(socket);
+                //////////////////////////////this.teamController.sendTeams(socket);
 
+            } else {
+                this.Debug("Player already exists:", player.playerTransform.playerID);
+            }
         } else {
-            this.Debug("Player already exists:", player.playerTransform.playerID);
+            this.Debug("Admin Connect ");
+
         }
     }
 
@@ -126,44 +134,11 @@ class PlayerController extends MainController {
     }
 
     /**
-     * Handles player connection and model creation.
-     * @param {object} socket - The client's socket instance.
-     * @param {object} data - The player data.
-     */
-    handlePlayerModel(socket) {
-        const playerID = socket.id
-
-
-        let player = this.FindPlayer(playerID);
-        if (!player) {
-            player = new PlayerModel(playerID);
-            this.Players.push(player);
-
-
-            this.SendSocketEmit(socket, "mainPlayer", player,
-                "man player model sent successfully",
-                "Failed to send main player model"
-            );
-            this.SendSocketBroadcast(socket, "newPlayerConnected", player,
-                "New player model sent successfully",
-                "Failed to send new player model"
-            );
-
-            this.teamController?.addPlayerToTeam(player.playerID, player.playerData.teamID);
-
-            this.teamController.sendTeams(socket);
-
-        } else {
-            this.Debug("Player already exists:", player.playerTransform.playerID);
-        }
-    }
-
-    /**
      * Handles synchronization of player transforms.
      * @param {object} socket - The client's socket instance.
      * @param {object} data - The player transform data.
      */
-    handlePlayerTransform(socket, data) {
+    handleSyncPlayerTransform(socket, data) {
         if (!data || !data.playerID) {
             this.DebugError("Invalid data received for syncPlayerTransform.");
             return;
@@ -183,8 +158,8 @@ class PlayerController extends MainController {
                 'syncPlayerTransform',
                 player.playerTransform,
                 "Player transform synchronized successfully",
-                "Player transform synchronization failed",
-                false
+                "Player transform synchronization failed"
+
             );
         } else {
             this.DebugError("Player not found for transform synchronization.");
@@ -250,7 +225,7 @@ class PlayerController extends MainController {
         }
     }
 
-    handleHealthChange(socket, data) {
+    handleDamagePlayer(socket, data) {
         this.Debug('Received Player Health Change:', data);
 
         const playerData = this.FindPlayer(data.playerID).playerData;
@@ -260,10 +235,10 @@ class PlayerController extends MainController {
 
                 playerData.health -= data.damage;
 
-                this.SendSocketALL(socket, 'updatePlayerHealth', playerData, 'Player Health Change successfully', 'Player Health Change Failded');
+                this.SendSocketALL(socket, 'PlayerDamage', playerData, 'Player Health Change successfully', 'Player Health Change Failded');
 
-            } else { ///////   When Dead
-
+            } else { ///////   When Dead-->
+                
 
                 playerData.health = 0;
 
@@ -281,6 +256,25 @@ class PlayerController extends MainController {
                 this.SendSocketALL(socket, 'updateTeam', team, 'updateTeam successfully', 'updateTeam Failded');
 
             }
+
+        } else {
+            const error = `Player ID ${data.playerID} not found.`;
+            this.DebugError(error);
+            socket.emit('playerHealthChangeError', { error });
+        }
+    }
+    handleRevivePlayer(socket, data) {
+        this.Debug('Received Revive Player:', data);
+
+        const playerData = this.FindPlayer(data.playerID).playerData;
+
+        if (playerData) {
+
+                playerData.health = 100;
+
+                this.SendSocketALL(socket, 'PlayerRevive', playerData, 'Player Health Change successfully', 'Player Health Change Failded');
+
+          
 
         } else {
             const error = `Player ID ${data.playerID} not found.`;

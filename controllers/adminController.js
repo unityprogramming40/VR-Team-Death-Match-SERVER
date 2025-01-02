@@ -64,9 +64,9 @@ class AdminController extends MainController {
 
         if (player) {
             player.playerData.name = playerNameChange.playerName;
-            this.SendSocketEmit(socket,'updatePlayerName', playerNameChange,'Player Name Change successfully','Player Name Change Failded');
-            this.SendSocketBroadcast(socket,'updatePlayerName', playerNameChange,'Player Name Change successfully','Player Name Change Failded');
-            this.Debug(`Player Name Change processed successfully: ${playerNameChange.playerName}`);
+
+            this.SendSocketALL(socket,'updatePlayerName', playerNameChange,'Player Name Change successfully','Player Name Change Failded');
+
         } else {
             const error = `Player ID ${playerNameChange.playerID} not found.`;
             this.DebugError(error);
@@ -106,8 +106,7 @@ class AdminController extends MainController {
             this.teamController?.removePlayerFromTeam(player.playerID, oldTeamID);
             this.teamController?.addPlayerToTeam(player.playerID, teamChange.newTeamID);
 
-            this.SendSocketEmit(socket,'updatePlayerTeam', teamChange,'Player Team Change successfully','Player Team Change Failded');
-            this.SendSocketBroadcast(socket,'updatePlayerTeam', teamChange,'Player Team Change successfully','Player Team Change Failded');
+            this.SendSocketALL(socket,'updatePlayerTeam', teamChange,'Player Team Change successfully','Player Team Change Failded');
             
             this.Debug(`Player ${player.playerID} moved from Team ${oldTeamID} to Team ${teamChange.newTeamID}.`);
 
