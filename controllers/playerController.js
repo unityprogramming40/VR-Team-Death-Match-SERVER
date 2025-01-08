@@ -241,14 +241,15 @@ class PlayerController extends MainController {
                 
 
                 playerData.health = 0;
-
                 this.SendSocketALL(socket, 'playerDead', data, 'player Dead successfully', 'player Dead Failded');
+
 
 
                 const attackerPlayerData = this.FindPlayer(data.attackerID).playerData;
 
-                attackerPlayerData.AddKillpoint();
-                this.SendSocketALL(socket, 'updatePlayerData', attackerPlayerData, 'attackerPlayerData  Change successfully', 'attackerPlayerData Change Failded');
+                attackerPlayerData.AddKillpoint();/////////////////////////////////
+                this.SendSocketALL(socket, 'addKillpoint', attackerPlayerData, 'attackerPlayerData  Change successfully', 'attackerPlayerData Change Failded');
+
 
                 this.teamController.addTeamPoint(data.teamID);
                 const team = this.teamController.FindTeam(data.teamID);
