@@ -31,6 +31,8 @@ class PlayerController extends MainController {
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
 
+            this.SendAllPlayers(socket);
+
             this.Debug('New client connected to PlayerController.');
 
             this.SendSocketEmit(socket, "newConnect", { id: socket.id }, "Connected", "Failed");
@@ -49,9 +51,6 @@ class PlayerController extends MainController {
     }
 
     StartConnect(socket, data) {
-
-        this.SendAllPlayers(socket);
-
         if (data.playerID == "player") {
             const playerID = socket.id
 

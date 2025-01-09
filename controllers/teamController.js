@@ -37,7 +37,7 @@ class TeamController extends MainController {
     initializeSocketEvents(io) {
         io.on('connection', (socket) => {
 
-            this.sendTeams(socket);
+            this.sendTeams(socket)
 
             socket.on('renameTeam', (data) => this.renameTeam(socket, data));
 
