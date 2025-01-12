@@ -134,11 +134,13 @@ class TeamController extends MainController {
      * Adds a point to a team's score.
      * @param {number} teamID - The ID of the team.
      */
-    addTeamPoint(teamID) {
+    addTeamPoint(socket,teamID) {
         const team = this.FindTeam(teamID);
 
         if (team) {
             team.teamPoints++;
+            this.SendSocketALL(socket, 'updateTeamPoints', team, 'Team send successfully', 'updateTeam Failded');
+
             this.Debug(`Point added to Team ${teamID}. Current points: ${team.teamPoints}.`, team);
         } else {
             this.DebugError(`Team with ID ${teamID} not found.`);

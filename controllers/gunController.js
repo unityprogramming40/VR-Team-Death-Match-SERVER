@@ -4,7 +4,7 @@ const MainController = require('./mainController');
 
 const GunsData = [
     new GunData(1, "none", 0, [0, 0, 0], [0, 0, 0], 30, 30, 7, 2),
-    new GunData(2, "none", 0, [0, 0, 0], [0, 0, 0], 12, 12, 15, 1)
+    new GunData(2, "none", 0, [0, 0, 0], [0, 0, 0], 12, 12, 35, 1)
 ];
 
 /**
