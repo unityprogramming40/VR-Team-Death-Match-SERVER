@@ -121,6 +121,7 @@ class TeamController extends MainController {
         if (team) {
             if (team.players.includes(playerID)) {
                 team.players = team.players.filter(id => id !== playerID);
+                
                 this.Debug(`Player ${playerID} removed from Team ${teamID}.`, team);
             } else {
                 this.DebugError(`Player ${playerID} not found in Team ${teamID}.`);

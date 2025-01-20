@@ -103,6 +103,8 @@ class AdminController extends MainController {
             }
 
             player.playerData.teamID = teamChange.newTeamID;
+            player.playerData.killpoints = 0;
+
             this.teamController?.removePlayerFromTeam(player.playerID, oldTeamID);
             this.teamController?.addPlayerToTeam(player.playerID, teamChange.newTeamID);
 
