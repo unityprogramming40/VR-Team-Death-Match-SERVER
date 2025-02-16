@@ -56,7 +56,7 @@ class PlayerController extends MainController {
 
             let player = this.FindPlayer(playerID);
             if (!player) {
-                player = new PlayerModel(playerID);
+                player = new PlayerModel(playerID,this.Players.length);
                 this.Players.push(player);
 
                 this.SendSocketEmit(socket, "PlayerSetUp", player,
@@ -142,7 +142,6 @@ class PlayerController extends MainController {
             this.DebugError("Invalid data received for syncPlayerTransform.");
             return;
         }
-
         const syncTransformCallBack = (player) => {
             player.playerTransform.headTranform = data.headTranform;
             player.playerTransform.rHandTransform = data.rHandTransform;
@@ -157,9 +156,7 @@ class PlayerController extends MainController {
                 'syncPlayerTransform',
                 player.playerTransform,
                 "Player transform synchronized successfully",
-                "Player transform synchronization failed"
-
-            );
+                "Player transform synchronization failed",false);
         } else {
             this.DebugError("Player not found for transform synchronization.");
         }
@@ -260,7 +257,7 @@ class PlayerController extends MainController {
         }
     }
     handleRevivePlayer(socket, data) {
-        this.Debug('Received Revive Player:', data);
+        this.Debug('Revive Revive Revive Player:', data);
 
         const playerData = this.FindPlayer(data.playerID).playerData;
 
@@ -269,8 +266,6 @@ class PlayerController extends MainController {
                 playerData.health = 100;
 
                 this.SendSocketALL(socket, 'PlayerRevive', playerData, 'Player Health Change successfully', 'Player Health Change Failded');
-
-          
 
         } else {
             const error = `Player ID ${data.playerID} not found.`;
