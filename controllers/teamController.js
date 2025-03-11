@@ -38,7 +38,7 @@ class TeamController extends MainController {
         io.on('connection', (socket) => {
 
             this.sendTeams(socket)
-
+            
             socket.on('renameTeam', (data) => this.renameTeam(socket, data));
 
             // socket.on('disconnect', () => this.Debug('Client disconnected from TeamController.'));
@@ -72,20 +72,18 @@ class TeamController extends MainController {
     /**
      * Renames a team based on the provided data.
      * @param {object} socket - The client's socket instance.
-     * @param {object} data - The data containing `iValue` (teamID) and `sID` (new name).
+     * @param {TeamData} teamData - The data containing `iValue` (teamID) and `sID` (new name).
      */
-    renameTeam(socket, data) {
-        if (!data || typeof data.iValue !== 'number' || typeof data.sID !== 'string') {
-            this.DebugError('Invalid data received for renameTeam:', data);
-            return;
-        }
-
-        const team = this.FindTeam(data.iValue);
+    renameTeam(socket, teamData) {
+        const team = this.FindTeam(teamData.teamID);
         if (team) {
-            team.teamName = data.sID;
-            this.Debug(`Renamed Team ${data.iValue} to "${data.sID}".`, team);
+            team.teamName = teamData.teamName;
+            this.SendSocketALL(socket,"renameTeam",{ Teams: this.Teams },"","")
+
+            this.Debug(`Renamed Team to ${teamData.teamName}`);
+
         } else {
-            this.DebugError(`Team with ID ${data.iValue} not found.`);
+            this.DebugError(`Team with ID ${teamData.teamID} not found.`);
         }
     }
 
@@ -152,7 +150,7 @@ class TeamController extends MainController {
      * Resets a team's points and all associated players' kill points.
      * @param {number} teamID - The ID of the team.
      */
-    resetTeamPoints(teamID) {
+    resetTeamPoints(socket,teamID) {
         const team = this.FindTeam(teamID);
 
         if (team) {
@@ -164,7 +162,7 @@ class TeamController extends MainController {
                     player.killpoints = 0;
                 }
             });
-
+            this.sendTeams(socket);
             this.Debug(`Points reset for Team ${teamID}.`, team);
         } else {
             this.DebugError(`Team with ID ${teamID} not found.`);

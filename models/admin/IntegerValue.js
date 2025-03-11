@@ -3,17 +3,17 @@
  */
 class IntegerValue {
     /**
-     * @param {number} idValue - The integer value to store.
+     * @param {number} value - The integer value to store.
      */
-    constructor(idValue) {
-        if (typeof idValue !== 'number' || !Number.isInteger(idValue)) {
+    constructor(value) {
+        if (typeof value !== 'number' || !Number.isInteger(value)) {
             throw new TypeError('idValue must be an integer.');
         }
 
         /**
          * @type {number} The integer value.
          */
-        this.idValue = idValue;
+        this.value = value;
     }
 }
 

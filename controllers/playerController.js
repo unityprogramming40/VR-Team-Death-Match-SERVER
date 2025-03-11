@@ -3,6 +3,7 @@ const PlayerData = require('../models/player/PlayerData');
 const PlayerModel = require('../models/player/PlayerModel');
 const MainController = require('./mainController');
 const TeamController = require('./teamController');
+const TransformJSON = require('../models/TransformJSON');
 
 
 /**
@@ -42,6 +43,8 @@ class PlayerController extends MainController {
 
             socket.on('syncPlayerTransform', (data) => this.handleSyncPlayerTransform(socket, data));
 
+            socket.on('changePlayerSpawn', (data) => this.handleChangePlayerSpawn(socket, data));
+
             socket.on("playerDamage", (data) => this.handleDamagePlayer(socket, data));
             socket.on("playerRevive", (data) => this.handleRevivePlayer(socket, data));
             // socket.on('playerData', (data) => this.handlePlayerData(socket, data));
@@ -50,13 +53,18 @@ class PlayerController extends MainController {
         });
     }
 
+    /**
+ * .
+ * @param {PlayerData} data - .
+ */
     StartConnect(socket, data) {
         if (data.playerID == "player") {
             const playerID = socket.id
 
             let player = this.FindPlayer(playerID);
             if (!player) {
-                player = new PlayerModel(playerID,this.Players.length);
+                // player = new PlayerModel(playerID, data.resetpointID);
+                player = new PlayerModel(playerID, this.Players.length);
                 this.Players.push(player);
 
                 this.SendSocketEmit(socket, "PlayerSetUp", player,
@@ -156,46 +164,31 @@ class PlayerController extends MainController {
                 'syncPlayerTransform',
                 player.playerTransform,
                 "Player transform synchronized successfully",
-                "Player transform synchronization failed",false);
+                "Player transform synchronization failed", false);
         } else {
             this.DebugError("Player not found for transform synchronization.");
         }
     }
 
     /**
-     * Handles updates to player data.
+     * Handles synchronization of player transforms.
      * @param {object} socket - The client's socket instance.
-     * @param {object} data - The player data.
+     * @param {TransformJSON} data - The player transform data.
      */
-    /*
-    handlePlayerData(socket, data) {
-        if (!data || !data.playerID) {
-            this.DebugError("Invalid data received for playerData.");
+    handleChangePlayerSpawn(socket, data) {
+        if (!data || !data.ID) {
+            this.DebugError("Invalid data received for syncPlayerTransform.");
             return;
         }
 
-        const updatePlayerData = (player) => {
-            player.playerData.name = data.name;
-            player.playerData.health = data.health;
-            player.playerData.teamID = data.teamID;
-            player.playerData.killpoints = data.killpoints;
-            player.playerData.resetpointID = data.resetpointID;
-        };
-
-        const player = this.findAndUpdatePlayer(this.Players, data.playerID, updatePlayerData);
-
-        if (player) {
-            this.SendSocketBroadcast(
+            this.SendSocketALL(
                 socket,
-                'updatePlayerData',
-                player.playerData,
-                "Player data updated successfully",
-                "Failed to update player data"
-            );
-        } else {
-            this.DebugError("Player not found for data update.");
-        }
-    }*/
+                'changePlayerSpawn',
+                data,
+                "Player spawn Changed successfully",
+                "Player spawn Change failed");
+       
+    }
 
     getAllPlayers() {
         return this.Players;
@@ -234,7 +227,7 @@ class PlayerController extends MainController {
                 this.SendSocketALL(socket, 'PlayerDamage', playerData, 'Player Health Change successfully', 'Player Health Change Failded');
 
             } else { ///////   When Dead-->
-                
+
 
                 playerData.health = 0;
                 this.SendSocketALL(socket, 'playerDead', data, 'player Dead successfully', 'player Dead Failded');
@@ -243,10 +236,10 @@ class PlayerController extends MainController {
 
                 attackerPlayerData.AddKillpoint();/////////////////////////////////
 
-                this.SendSocketALL(socket, 'addKillpoint', attackerPlayerData, 'attackerPlayerData  Change successfully', 'attackerPlayerData Change Failded',false);
+                this.SendSocketALL(socket, 'addKillpoint', attackerPlayerData, 'attackerPlayerData  Change successfully', 'attackerPlayerData Change Failded', false);
 
 
-                this.teamController.addTeamPoint(socket,data.teamID);
+                this.teamController.addTeamPoint(socket, data.teamID);
 
             }
 
@@ -263,9 +256,9 @@ class PlayerController extends MainController {
 
         if (playerData) {
 
-                playerData.health = 100;
+            playerData.health = 100;
 
-                this.SendSocketALL(socket, 'PlayerRevive', playerData, 'Player Health Change successfully', 'Player Health Change Failded');
+            this.SendSocketALL(socket, 'PlayerRevive', playerData, 'Player Health Change successfully', 'Player Health Change Failded');
 
         } else {
             const error = `Player ID ${data.playerID} not found.`;

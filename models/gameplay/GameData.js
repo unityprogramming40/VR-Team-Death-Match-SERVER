@@ -60,11 +60,16 @@ class GameData {
         this.currentTime = 0;
     }
 
-    startGame(timer, currentEnv) {
+    setTime(value) {
+        this.currentTime = value;
+    }
+
+    startGame(timer) {
         this.gameStarted = true;
         this.mainTimer = timer;
-        this.currentEnvID = currentEnv;
-        console.log('startGame', this.mainTimer, this.currentEnvID)
+        this.currentTime =timer;
+       // this.currentEnvID = currentEnv;
+        console.log('startGame', timer)
     }
 
     pauseGame() {
@@ -72,9 +77,14 @@ class GameData {
         console.log('pauseGame', this.gamePaused)
     }
 
+    resumeGame() {
+        this.gamePaused = false;
+        console.log('resumeGame', this.gamePaused)
+    }
+
     stopGame() {
         this.gameStopped = true;
-        this.resetTimer();
+        //this.resetTimer();
         console.log('stopGame', this.gameStopped)
     }
 

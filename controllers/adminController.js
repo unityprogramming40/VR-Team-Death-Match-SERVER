@@ -19,6 +19,26 @@ class AdminController extends MainController {
         this.initializeSocketEvents(io);
     }
 
+    /**
+     * Initializes Socket.IO event listeners.
+     * @param {object} io - The Socket.IO instance.
+     */
+    initializeSocketEvents(io) {
+        io.on('connection', (socket) => {
+
+            socket.on('playerteamChange', (data) => this.handleTeamChange(socket, new TeamChange(data.playerID, data.newTeamID)));
+            socket.on('playerNameChange', (data) => this.handlePlayerNameChange(socket, new PlayerNameChange(data.playerID, data.playerName)));
+            socket.on('playerTransformChange', (data) => this.handleChangePosition(socket, data));
+
+            socket.on('integerValue', (data) => this.handleIntegerValue(socket, new IntegerValue(data.idValue)));
+
+
+
+
+
+        });
+    }
+
     // Setter methods for controllers
     setGunController(gunController) {
         this.gunController = gunController;
@@ -36,21 +56,7 @@ class AdminController extends MainController {
         this.gameplayController = gameplayController;
     }
 
-    /**
-     * Initializes Socket.IO event listeners.
-     * @param {object} io - The Socket.IO instance.
-     */
-    initializeSocketEvents(io) {
-        io.on('connection', (socket) => {
 
-            socket.on('playerteamChange', (data) => this.handleTeamChange(socket, new TeamChange(data.playerID, data.newTeamID)));
-            socket.on('playerNameChange', (data) => this.handlePlayerNameChange(socket, new PlayerNameChange(data.playerID, data.playerName)));
-            socket.on('changePosition', (data) => this.handleChangePosition(socket, new ChangePosition(data.id, data.position)));
-            socket.on('integerValue', (data) => this.handleIntegerValue(socket, new IntegerValue(data.idValue)));
-
-
-        });
-    }
 
     /**
      * Handles player name change requests.
@@ -65,7 +71,7 @@ class AdminController extends MainController {
         if (player) {
             player.playerData.name = playerNameChange.playerName;
 
-            this.SendSocketALL(socket,'updatePlayerName', playerNameChange,'Player Name Change successfully','Player Name Change Failded');
+            this.SendSocketALL(socket, 'updatePlayerName', playerNameChange, 'Player Name Change successfully', 'Player Name Change Failded');
 
         } else {
             const error = `Player ID ${playerNameChange.playerID} not found.`;
@@ -108,8 +114,8 @@ class AdminController extends MainController {
             this.teamController?.removePlayerFromTeam(player.playerID, oldTeamID);
             this.teamController?.addPlayerToTeam(player.playerID, teamChange.newTeamID);
 
-            this.SendSocketALL(socket,'updatePlayerTeam', teamChange,'Player Team Change successfully','Player Team Change Failded');
-            
+            this.SendSocketALL(socket, 'updatePlayerTeam', teamChange, 'Player Team Change successfully', 'Player Team Change Failded');
+
             this.Debug(`Player ${player.playerID} moved from Team ${oldTeamID} to Team ${teamChange.newTeamID}.`);
 
         } else {
@@ -124,10 +130,9 @@ class AdminController extends MainController {
      * @param {object} socket - The client's socket instance.
      * @param {ChangePosition} changePosition - The ChangePosition instance.
      */
-    handleChangePosition(socket, changePosition) {
-        this.Debug('Received Change Position:', changePosition);
-        socket.emit('updateChangePosition', changePosition);
-        this.Debug('Position Change processed and broadcasted.');
+    handleChangePosition(socket, data) {
+        this.SendSocketBroadcast(socket, "updatePlayerTransform", data, "", "")
+        this.Debug("Change Transform" + data.value+data.axis)
     }
 
     /**
@@ -140,6 +145,9 @@ class AdminController extends MainController {
         this.io.emit('updateIntegerValue', integerValue);
         this.Debug('Integer Value processed and broadcasted.');
     }
+
+
+
 }
 
 module.exports = AdminController;

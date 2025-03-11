@@ -3,8 +3,10 @@ const BulletData = require('../models/gun/BulletData');
 const MainController = require('./mainController');
 
 const GunsData = [
-    new GunData(1, "", 0, [0, 0, 0], [0, 0, 0], 30, 30, 35, 2),
-    new GunData(2, "", 0, [0, 0, 0], [0, 0, 0], 12, 12, 35, 1)
+    new GunData(1, "", 0, [0, 0, 0], [0, 0, 0], 30, 30, 20, 1),
+    new GunData(2, "", 0, [0, 0, 0], [0, 0, 0], 12, 12, 20, 2),
+    new GunData(3, "", 0, [0, 0, 0], [0, 0, 0], 12, 12, 20, 3),
+    new GunData(4, "", 0, [0, 0, 0], [0, 0, 0], 12, 12, 20, 4)
 ];
 
 /**
@@ -29,10 +31,15 @@ class GunController extends MainController {
 
             this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed');
 
+            socket.on('getAllGuns', _ =>  this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed'));
+
+
             socket.on('sendGunData', (data) => this.handleGunData(socket, this.createGunData(data)));
             socket.on('updateGunData', (data) => this.handleGunData(socket, data));
             socket.on('playerShoot', (data) => this.handlePlayerShoot(socket, data));
-
+            socket.on('reloadGun', (data) => this.handleReloadGun(socket, data));
+            socket.on('restGun', (data) => this.handleRestGun(socket, data));
+            
             //socket.on('disconnect', () => this.Debug('Client disconnected from GunController'));
         });
     }
@@ -80,6 +87,20 @@ class GunController extends MainController {
         return null;
     }
 
+    gunShoot(gunID) {
+        const gun = GunsData.find(g => g.gunID === gunID);
+        if (gun) {
+            gun.currentBullets -= 1
+        }
+    }
+
+    ReloadGun(gunID) {
+        const gun = GunsData.find(g => g.gunID === gunID);
+        if (gun) {
+            gun.currentBullets = gun.maxBullets;
+        }
+    }
+
     /**
      * Handles incoming gun data updates or additions.
      * @param {object} socket - The client's socket instance.
@@ -125,9 +146,27 @@ class GunController extends MainController {
      */
 
     handlePlayerShoot(socket, bulletData) {
-        this.Debug('Received Bullet Data:', bulletData);
-
+        this.Debug('handle Player Shoot:', bulletData);
+        this.gunShoot(bulletData.gunID);
         this.SendSocketALL(socket, 'playerShoot', bulletData, "Player Shoot: " + bulletData.playerID, "Player Shoot Failed");
+
+    }
+
+    handleReloadGun(socket, gunData) {
+        this.Debug('handle Reload:', gunData);
+
+        this.ReloadGun(gunData.gunID);
+        
+        this.SendSocketALL(socket, 'reloadGun', gunData,"","");
+
+    }
+
+    handleRestGun(socket, data) {
+        this.Debug('handle Reload:', data);
+
+        this.ReloadGun(data.ID);
+        
+        this.SendSocketALL(socket, 'restGun', data,"","");
 
     }
 }

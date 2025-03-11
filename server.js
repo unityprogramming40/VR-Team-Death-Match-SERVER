@@ -1,3 +1,4 @@
+
 const http = require('http');
 const socketIo = require('socket.io');
 const expressApp = require('./app'); // ملف إعدادات Express
@@ -25,6 +26,7 @@ const playerController = new PlayerController(io);
 const gameplayController = new GameplayController(io);
 const adminController = new AdminController(io);
 
+gameplayController.setTeamController(teamController);
 teamController.setPlayerController(playerController);
 
 playerController.setTeamController(teamController);
