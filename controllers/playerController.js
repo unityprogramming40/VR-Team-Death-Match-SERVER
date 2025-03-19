@@ -150,6 +150,7 @@ class PlayerController extends MainController {
             this.DebugError("Invalid data received for syncPlayerTransform.");
             return;
         }
+
         const syncTransformCallBack = (player) => {
             player.playerTransform.headTranform = data.headTranform;
             player.playerTransform.rHandTransform = data.rHandTransform;
@@ -265,6 +266,15 @@ class PlayerController extends MainController {
             this.DebugError(error);
             socket.emit('playerHealthChangeError', { error });
         }
+    }
+
+    sendRestPlayersHealth(socket){
+        this.Players.forEach(player => {
+            if (player && player.playerData) {
+                player.playerData.health = 100; // Assuming maxHealth exists
+                this.SendSocketALL(socket, 'restPlayerhealth', player.playerData, 'Player Health Reset Successfully', 'Player Health Reset Failed');
+            }
+        });
     }
 }
 

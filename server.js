@@ -27,6 +27,7 @@ const gameplayController = new GameplayController(io);
 const adminController = new AdminController(io);
 
 gameplayController.setTeamController(teamController);
+gameplayController.setPlayerController(playerController);
 teamController.setPlayerController(playerController);
 
 playerController.setTeamController(teamController);

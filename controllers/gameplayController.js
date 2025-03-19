@@ -1,6 +1,7 @@
 const IntegerValue = require('../models/admin/IntegerValue');
 const GameData = require('../models/gameplay/GameData');
 const MainController = require('./mainController');
+const PlayerController = require('./playerController');
 const TeamController = require('./teamController');
 
 /**
@@ -68,6 +69,7 @@ class GameplayController extends MainController {
                     this.teamController.resetTeamPoints(socket,team.teamID);
                 });
 
+                this.playerController.sendRestPlayersHealth(socket);
                 this.Debug('Game stopped.');
             });
 
@@ -79,6 +81,9 @@ class GameplayController extends MainController {
                 this.teamController.Teams.forEach(team => {
                     this.teamController.resetTeamPoints(socket,team.teamID);
                 });
+
+                this.playerController.sendRestPlayersHealth(socket);
+
                 this.Debug('Game completed.');
             });
 
@@ -91,50 +96,6 @@ class GameplayController extends MainController {
                 socket.emit("Pong");
             });
 
-            // Uncomment these sections if you need to handle team-related events in the future
-            /*
-            socket.on('addPlayerTeam1', (data) => {
-                this.gameData.addPlayerTeam1(data.text);
-                this.io.emit('team1Updated', { team1: this.gameData.team1Players });
-                this.Debug('Player added to Team 1:', data.text);
-            });
-
-            socket.on('addPlayerTeam2', (data) => {
-                this.gameData.addPlayerTeam2(data.text);
-                this.io.emit('team2Updated', { team2: this.gameData.team2Players });
-                this.Debug('Player added to Team 2:', data.text);
-            });
-
-            socket.on('removePlayerTeam1', (data) => {
-                this.gameData.removePlayerTeam1(data.text);
-                this.io.emit('team1Updated', { team1: this.gameData.team1Players });
-                this.Debug('Player removed from Team 1:', data.text);
-            });
-
-            socket.on('removePlayerTeam2', (data) => {
-                this.gameData.removePlayerTeam2(data.text);
-                this.io.emit('team2Updated', { team2: this.gameData.team2Players });
-                this.Debug('Player removed from Team 2:', data.text);++++++++++++++++++++++
-            });
-
-            socket.on('addTeam1Point', () => {
-                this.gameData.addTeam1Point();
-                this.io.emit('team1PointsUpdated', { points: this.gameData.team1Killpoints });
-                this.Debug('Team 1 point added.');
-            });
-
-            socket.on('addTeam2Point', () => {
-                this.gameData.addTeam2Point();
-                this.io.emit('team2PointsUpdated', { points: this.gameData.team2Killpoints });
-                this.Debug('Team 2 point added.');
-            });
-            */
-
-            // Handle client disconnection
-            // socket.on('disconnect', () => {
-            //     this.Debug('Client disconnected from GameplayController.');
-            // });
-       
        
         });
     }
@@ -146,6 +107,13 @@ class GameplayController extends MainController {
      */
     setTeamController(teamController) {
         this.teamController = teamController;
+    }
+    /**
+     * Sets the TeamController instance.
+     * @param {PlayerController} playerController - The TeamController instance.
+     */
+    setPlayerController(playerController) {
+        this.playerController = playerController;
     }
 
     handleSetTimer(socket, time) {
