@@ -67,8 +67,8 @@ class GameData {
     startGame(timer) {
         this.gameStarted = true;
         this.mainTimer = timer;
-        this.currentTime =timer;
-       // this.currentEnvID = currentEnv;
+        this.currentTime = timer;
+        // this.currentEnvID = currentEnv;
         console.log('startGame', timer)
     }
 

@@ -4,6 +4,7 @@ const PlayerModel = require('../models/player/PlayerModel');
 const MainController = require('./mainController');
 const TeamController = require('./teamController');
 const TransformJSON = require('../models/TransformJSON');
+const GameplayController = require('./gameplayController');
 
 
 /**
@@ -23,6 +24,9 @@ class PlayerController extends MainController {
         super.admin = true;
 
         this.initializeSocketEvents(io);
+
+
+
     }
 
     /**
@@ -37,6 +41,7 @@ class PlayerController extends MainController {
             this.Debug('New client connected to PlayerController.');
 
             this.SendSocketEmit(socket, "newConnect", { id: socket.id }, "Connected", "Failed");
+            this.socID = socket.id;
 
             socket.on('Connected', (data) => this.StartConnect(socket, data));
 
@@ -59,12 +64,14 @@ class PlayerController extends MainController {
  */
     StartConnect(socket, data) {
         if (data.playerID == "player") {
-            const playerID = socket.id
+            const playerID = "00" + data.resetpointID + "00"
+            this.Uid = playerID;
 
             let player = this.FindPlayer(playerID);
             if (!player) {
-                // player = new PlayerModel(playerID, data.resetpointID);
-                player = new PlayerModel(playerID, this.Players.length);
+                player = new PlayerModel(playerID, data.resetpointID);
+                // player = new PlayerModel(playerID, this.Players.length);
+
                 this.Players.push(player);
 
                 this.SendSocketEmit(socket, "PlayerSetUp", player,
@@ -79,8 +86,9 @@ class PlayerController extends MainController {
                 this.teamController?.addPlayerToTeam(player.playerID, player.playerData.teamID);
 
                 this.Debug("Player Connect  ");
-
-                //////////////////////////////this.teamController.sendTeams(socket);
+                if (this.gamePlayController.gameData.gameStarted) {
+                    this.gamePlayController.handleGameAleadryStatred(socket);
+                }
 
             } else {
                 this.Debug("Player already exists:", player.playerTransform.playerID);
@@ -97,6 +105,14 @@ class PlayerController extends MainController {
      */
     setTeamController(teamController) {
         this.teamController = teamController;
+    }
+
+    /**
+     * Sets the GamePlayController instance.
+     * @param {GameplayController} gamePlayController - The gamePlayController instance.
+     */
+    setGamePlayController(gamePlayController) {
+        this.gamePlayController = gamePlayController;
     }
 
     /**
@@ -182,13 +198,13 @@ class PlayerController extends MainController {
             return;
         }
 
-            this.SendSocketALL(
-                socket,
-                'changePlayerSpawn',
-                data,
-                "Player spawn Changed successfully",
-                "Player spawn Change failed");
-       
+        this.SendSocketALL(
+            socket,
+            'changePlayerSpawn',
+            data,
+            "Player spawn Changed successfully",
+            "Player spawn Change failed");
+
     }
 
     getAllPlayers() {
@@ -200,6 +216,8 @@ class PlayerController extends MainController {
      */
     handlePlayerDisconnect(socket) {
         const PID = socket.id
+
+        console.log(this.socID + "-" + this.Uid);
         const player = this.FindPlayer(PID)
 
         if (player) {
@@ -268,7 +286,7 @@ class PlayerController extends MainController {
         }
     }
 
-    sendRestPlayersHealth(socket){
+    sendRestPlayersHealth(socket) {
         this.Players.forEach(player => {
             if (player && player.playerData) {
                 player.playerData.health = 100; // Assuming maxHealth exists

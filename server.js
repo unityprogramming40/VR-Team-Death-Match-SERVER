@@ -31,6 +31,7 @@ gameplayController.setPlayerController(playerController);
 teamController.setPlayerController(playerController);
 
 playerController.setTeamController(teamController);
+playerController.setGamePlayController(gameplayController);
 
 adminController.setGunController(gunController);
 adminController.setTeamController(teamController);

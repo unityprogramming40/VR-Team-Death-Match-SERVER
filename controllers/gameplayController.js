@@ -129,6 +129,17 @@ class GameplayController extends MainController {
     }
 
 
+    handleGameAleadryStatred(socket) {
+
+        this.SendSocketEmit(socket, "Set Timer", new IntegerValue(this.gameData.mainTimer / 60), "Timer Sent", "Timers Error");
+        this.SendSocketEmit(socket, "Set Map", new IntegerValue(this.gameData.currentEnvID), "Map Sent", "Map Error");
+        this.SendSocketEmit(socket, "gameStarted", new IntegerValue(0), "", "");
+
+        
+    }
+
+
+
 }
 
 module.exports = GameplayController;
