@@ -71,7 +71,9 @@ class GunController extends MainController {
 
             this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed');
 
-            socket.on('getAllGuns', _ =>  this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed'));
+            socket.on('getAllGuns', (data) => { 
+                console.log("get guns")
+                this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed')});
 
 
             socket.on('sendGunData', (data) => this.handleGunData(socket, this.createGunData(data)));

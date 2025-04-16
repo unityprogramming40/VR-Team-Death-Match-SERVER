@@ -51,7 +51,7 @@ class TeamController extends MainController {
      */
     sendTeams(socket) {
         try {
-            this.SendSocketEmit(socket, 'Teams', { Teams: this.Teams }, "Teams Sent to Client", "Failed Send Teams");
+            this.SendSocketEmit(socket, 'Teams', { Teams: this.Teams }, "Teams Sent to Client", "Failed Send Teams",false);
         } catch (error) {
             this.DebugError('Error in sendTeams:', error);
         }

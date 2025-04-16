@@ -9,15 +9,15 @@
     <h1>Teams</h1>
     <hr />
 
-    <h2><%= teams[0].teamName %> Players</h2>
+    <h2><%= teams[0].teamName +" "+ teams[0].teamPoints %> Players</h2>
     <ul>
         <% teams[0].players.forEach(player => { %>
             <li><%= player %></li>
         <% }); %>
     </ul>
     <hr />
-
-    <h2><%= teams[1].teamName %> Players</h2>
+    
+    <h2><%= teams[1].teamName +" "+ teams[1].teamPoints %> Players</h2>
     <ul>
         <% teams[1].players.forEach(player => { %>
             <li><%= player %></li>

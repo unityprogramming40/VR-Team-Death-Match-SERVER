@@ -40,8 +40,7 @@ class PlayerController extends MainController {
 
             this.Debug('New client connected to PlayerController.');
 
-            this.SendSocketEmit(socket, "newConnect", { id: socket.id }, "Connected", "Failed");
-            this.socID = socket.id;
+            this.SendSocketEmit(socket, "newConnect", { id: socket.id }, "Connected", "Failed",false);
 
             socket.on('Connected', (data) => this.StartConnect(socket, data));
 
@@ -64,9 +63,9 @@ class PlayerController extends MainController {
  */
     StartConnect(socket, data) {
         if (data.playerID == "player") {
-            const playerID = "00" + data.resetpointID + "00"
-            this.Uid = playerID;
-
+            // const playerID = "00" + data.resetpointID + "00"
+            const playerID = socket.id;
+            
             let player = this.FindPlayer(playerID);
             if (!player) {
                 player = new PlayerModel(playerID, data.resetpointID);
@@ -217,7 +216,6 @@ class PlayerController extends MainController {
     handlePlayerDisconnect(socket) {
         const PID = socket.id
 
-        console.log(this.socID + "-" + this.Uid);
         const player = this.FindPlayer(PID)
 
         if (player) {

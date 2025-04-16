@@ -31,10 +31,12 @@ class GameplayController extends MainController {
             //this.Debug('New client connected to GameplayController.');
 
             // Send current game data to the client
-            this.SendSocketEmit(socket, 'GameData', { gameData: this.gameData }, "Game Data Sent ", "Failed send Game Data");
+            this.SendSocketEmit(socket, 'GameData', { gameData: this.gameData }, "Game Data Sent ", "Failed send Game Data",false);
 
             socket.on('set timer', (data) => this.handleSetTimer(socket, data.value));
             socket.on('set map', (data) => this.handleSetMap(socket, data.value));
+
+            
 
             // Start the game
             socket.on('startGame', _ => {
@@ -96,7 +98,10 @@ class GameplayController extends MainController {
                 socket.emit("Pong");
             });
 
-       
+
+            socket.on("mapObjChange", (data) => {
+                this.SendSocketBroadcast(socket,"mapObjChange",data,"object map sent","object map failed");
+            });       
         });
     }
 
