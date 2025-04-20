@@ -31,12 +31,10 @@ class GameplayController extends MainController {
             //this.Debug('New client connected to GameplayController.');
 
             // Send current game data to the client
-            this.SendSocketEmit(socket, 'GameData', { gameData: this.gameData }, "Game Data Sent ", "Failed send Game Data",false);
+            this.SendSocketEmit(socket, 'GameData', { gameData: this.gameData }, "Game Data Sent ", "Failed send Game Data", false);
 
             socket.on('set timer', (data) => this.handleSetTimer(socket, data.value));
             socket.on('set map', (data) => this.handleSetMap(socket, data.value));
-
-            
 
             // Start the game
             socket.on('startGame', _ => {
@@ -68,7 +66,7 @@ class GameplayController extends MainController {
                 this.SendSocketBroadcast(socket, "gameStopped", new IntegerValue(0), "", "");
 
                 this.teamController.Teams.forEach(team => {
-                    this.teamController.resetTeamPoints(socket,team.teamID);
+                    this.teamController.resetTeamPoints(socket, team.teamID);
                 });
 
                 this.playerController.sendRestPlayersHealth(socket);
@@ -81,7 +79,7 @@ class GameplayController extends MainController {
                 this.SendSocketBroadcast(socket, "gameCompleted", new IntegerValue(0), "", "");
 
                 this.teamController.Teams.forEach(team => {
-                    this.teamController.resetTeamPoints(socket,team.teamID);
+                    this.teamController.resetTeamPoints(socket, team.teamID);
                 });
 
                 this.playerController.sendRestPlayersHealth(socket);
@@ -100,8 +98,8 @@ class GameplayController extends MainController {
 
 
             socket.on("mapObjChange", (data) => {
-                this.SendSocketBroadcast(socket,"mapObjChange",data,"object map sent","object map failed");
-            });       
+                this.SendSocketBroadcast(socket, "mapObjChange", data, "object map sent", "object map failed");
+            });
         });
     }
 
@@ -125,8 +123,8 @@ class GameplayController extends MainController {
 
         this.gameData.mainTimer = time;
         this.SendSocketALL(socket, "Set Timer", new IntegerValue(time / 60), "Timer Sent", "Timers Error");
-    }   
-    
+    }
+
     handleSetMap(socket, map) {
 
         this.gameData.currentEnvID = map;
@@ -140,7 +138,7 @@ class GameplayController extends MainController {
         this.SendSocketEmit(socket, "Set Map", new IntegerValue(this.gameData.currentEnvID), "Map Sent", "Map Error");
         this.SendSocketEmit(socket, "gameStarted", new IntegerValue(0), "", "");
 
-        
+
     }
 
 

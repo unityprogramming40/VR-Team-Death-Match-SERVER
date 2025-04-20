@@ -36,8 +36,8 @@ class PlayerData {
     }
 
 
-    RestKillpoint() {
-        this.killpoints = 0;
+    RestKillpoints() {
+        this.killpoints = -1;
     }
 }
 

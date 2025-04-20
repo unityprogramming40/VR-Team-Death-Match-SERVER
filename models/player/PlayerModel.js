@@ -13,6 +13,10 @@ class PlayerModel {
         this.playerTransform = new PlayerTransform(playerID, new TransformJSON([0, 0, 0], [0, 0, 0]),new TransformJSON([0, 0, 0], [0, 0, 0]),new TransformJSON([0, 0, 0], [0, 0, 0]));
         this.playerData = new PlayerData(playerID, "player", 100, 1, 0, spawnpoint);
     }
+
+    RestKillpoints() {
+        this.playerData.killpoints = 0;
+    }
 }
 
 module.exports = PlayerModel;

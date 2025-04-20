@@ -1,10 +1,12 @@
 const PlayerTransform = require('../models/player/PlayerTransform');
+
 const PlayerData = require('../models/player/PlayerData');
 const PlayerModel = require('../models/player/PlayerModel');
 const MainController = require('./mainController');
 const TeamController = require('./teamController');
 const TransformJSON = require('../models/TransformJSON');
 const GameplayController = require('./gameplayController');
+const IntegerValue = require('../models/admin/IntegerValue');
 
 
 /**
@@ -40,7 +42,7 @@ class PlayerController extends MainController {
 
             this.Debug('New client connected to PlayerController.');
 
-            this.SendSocketEmit(socket, "newConnect", { id: socket.id }, "Connected", "Failed",false);
+            this.SendSocketEmit(socket, "newConnect", { id: socket.id }, "Connected", "Failed", false);
 
             socket.on('Connected', (data) => this.StartConnect(socket, data));
 
@@ -65,7 +67,7 @@ class PlayerController extends MainController {
         if (data.playerID == "player") {
             // const playerID = "00" + data.resetpointID + "00"
             const playerID = socket.id;
-            
+
             let player = this.FindPlayer(playerID);
             if (!player) {
                 player = new PlayerModel(playerID, data.resetpointID);
@@ -85,8 +87,15 @@ class PlayerController extends MainController {
                 this.teamController?.addPlayerToTeam(player.playerID, player.playerData.teamID);
 
                 this.Debug("Player Connect  ");
-                if (this.gamePlayController.gameData.gameStarted) {
-                    this.gamePlayController.handleGameAleadryStatred(socket);
+
+                if (this.gamePlayController.gameData.mainTimer > 0) {
+                    this.SendSocketEmit(socket, "Set Timer", new IntegerValue(this.gameData.mainTimer / 60), "Late Timer Sent", "Timers Error");
+                }
+                if (this.gamePlayController.gameData.currentEnvID>0) {
+                    this.SendSocketEmit(socket, "Set Map", new IntegerValue(this.gameData.currentEnvID), "Late Map Sent", "Map Error");
+                }
+                if (this.gamePlayController.gameData.gameStarted>0) {
+                    this.SendSocketEmit(socket, "gameStarted", new IntegerValue(0), "Late game started", "");
                 }
 
             } else {
@@ -149,7 +158,7 @@ class PlayerController extends MainController {
     /**
      * Finds a player by their ID.
      * @param {string} playerID - The ID of the player to find.
-     * @returns {object|null} - The found player or null if not found.
+     * @returns {PlayerData|null} - The found player or null if not found.
      */
     FindPlayer(playerID) {
         return this.Players.find(p => p.playerID === playerID) || null;

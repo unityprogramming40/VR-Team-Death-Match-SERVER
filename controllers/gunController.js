@@ -69,13 +69,13 @@ class GunController extends MainController {
         io.on('connection', (socket) => {
             //this.Debug('New client connected to GunController');
 
-            this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed');
+            this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed',false);
 
             socket.on('getAllGuns', (data) => { 
                 console.log("get guns")
-                this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed')});
+                this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed',false)});
 
-
+                    
             socket.on('sendGunData', (data) => this.handleGunData(socket, this.createGunData(data)));
             socket.on('updateGunData', (data) => this.handleGunData(socket, data));
             socket.on('playerShoot', (data) => this.handlePlayerShoot(socket, data));

@@ -1,3 +1,4 @@
+const PlayerData = require('../models/player/PlayerData');
 const TeamData = require('../models/team/teamData');
 const MainController = require('./mainController');
 
@@ -38,7 +39,7 @@ class TeamController extends MainController {
         io.on('connection', (socket) => {
 
             this.sendTeams(socket)
-            
+
             socket.on('renameTeam', (data) => this.renameTeam(socket, data));
 
             // socket.on('disconnect', () => this.Debug('Client disconnected from TeamController.'));
@@ -51,7 +52,7 @@ class TeamController extends MainController {
      */
     sendTeams(socket) {
         try {
-            this.SendSocketEmit(socket, 'Teams', { Teams: this.Teams }, "Teams Sent to Client", "Failed Send Teams",false);
+            this.SendSocketEmit(socket, 'Teams', { Teams: this.Teams }, "Teams Sent to Client", "Failed Send Teams", false);
         } catch (error) {
             this.DebugError('Error in sendTeams:', error);
         }
@@ -64,9 +65,9 @@ class TeamController extends MainController {
     getTeams() {
         return this.Teams;
     }
- 
+
     FindTeam(teamID) {
-        return this.Teams.find(t=>t.teamID==teamID);
+        return this.Teams.find(t => t.teamID == teamID);
     }
 
     /**
@@ -78,7 +79,7 @@ class TeamController extends MainController {
         const team = this.FindTeam(teamData.teamID);
         if (team) {
             team.teamName = teamData.teamName;
-            this.SendSocketALL(socket,"renameTeam",{ Teams: this.Teams },"","")
+            this.SendSocketALL(socket, "renameTeam", { Teams: this.Teams }, "", "")
 
             this.Debug(`Renamed Team to ${teamData.teamName}`);
 
@@ -102,7 +103,7 @@ class TeamController extends MainController {
                 team.players.push(playerID);
                 this.Debug(`Player ${playerID} added to Team ${teamID}.`, team);
             }
-            
+
         } else {
             this.DebugError(`Team with ID ${teamID} not found.`);
         }
@@ -119,7 +120,7 @@ class TeamController extends MainController {
         if (team) {
             if (team.players.includes(playerID)) {
                 team.players = team.players.filter(id => id !== playerID);
-                
+
                 this.Debug(`Player ${playerID} removed from Team ${teamID}.`, team);
             } else {
                 this.DebugError(`Player ${playerID} not found in Team ${teamID}.`);
@@ -133,7 +134,7 @@ class TeamController extends MainController {
      * Adds a point to a team's score.
      * @param {number} teamID - The ID of the team.
      */
-    addTeamPoint(socket,teamID) {
+    addTeamPoint(socket, teamID) {
         const team = this.FindTeam(teamID);
 
         if (team) {
@@ -150,16 +151,18 @@ class TeamController extends MainController {
      * Resets a team's points and all associated players' kill points.
      * @param {number} teamID - The ID of the team.
      */
-    resetTeamPoints(socket,teamID) {
+    resetTeamPoints(socket, teamID) {
         const team = this.FindTeam(teamID);
 
         if (team) {
             team.teamPoints = 0;
-
             team.players.forEach(playerID => {
+
                 const player = this.playerController?.FindPlayer(playerID);
+
                 if (player) {
-                    player.killpoints = 0;
+                    player.RestKillpoints();
+
                 }
             });
             this.sendTeams(socket);
