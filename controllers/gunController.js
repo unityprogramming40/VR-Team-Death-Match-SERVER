@@ -72,7 +72,6 @@ class GunController extends MainController {
             this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed',false);
 
             socket.on('getAllGuns', (data) => { 
-                console.log("get guns")
                 this.SendSocketEmit(socket, 'getGuns', { models: GunsData }, 'send guns sucessed', 'send guns failed',false)});
 
                     
@@ -149,7 +148,7 @@ class GunController extends MainController {
      * @param {GunData} data - The GunData instance.
      */
     handleGunData(socket, data) {
-        this.Debug('Received Gun Data:', data);
+        // this.Debug('Received Gun Data:', data);
 
         const updateGunData = (gun) => {
             gun.playerID = data.playerID;
@@ -167,9 +166,9 @@ class GunController extends MainController {
         if (!gun) {
             gun = this.createGunData(data);
             GunsData.push(gun);
-            this.Debug(`Gun with ID ${data.gunID} added to GunsData.`);
+            // this.Debug(`Gun with ID ${data.gunID} added to GunsData.`);
         } else {
-            this.Debug(`Gun with ID ${data.gunID} updated in GunsData.`);
+            // this.Debug(`Gun with ID ${data.gunID} updated in GunsData.`);
         }
 
         this.SendSocketBroadcast(
@@ -177,7 +176,7 @@ class GunController extends MainController {
             'updateGunData',
             gun,
             `Gun Data => updated successfully for gunID: ${data.gunID}`,
-            `Gun Data => could not find or create gunID: ${data.gunID}`
+            `Gun Data => could not find or create gunID: ${data.gunID}`,false
         );
     }
 
@@ -188,9 +187,8 @@ class GunController extends MainController {
      */
 
     handlePlayerShoot(socket, bulletData) {
-        this.Debug('handle Player Shoot:', bulletData);
         this.gunShoot(bulletData.gunID);
-        this.SendSocketALL(socket, 'playerShoot', bulletData, "Player Shoot: " + bulletData.playerID, "Player Shoot Failed");
+        this.SendSocketALL(socket, 'playerShoot', bulletData, "Player Shoot: " + bulletData.playerID, "Player Shoot Failed",false);
 
     }
 

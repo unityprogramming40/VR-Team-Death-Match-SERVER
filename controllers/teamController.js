@@ -121,7 +121,7 @@ class TeamController extends MainController {
             if (team.players.includes(playerID)) {
                 team.players = team.players.filter(id => id !== playerID);
 
-                this.Debug(`Player ${playerID} removed from Team ${teamID}.`, team);
+                // this.Debug(`Player ${playerID} removed from Team ${teamID}.`, team);
             } else {
                 this.DebugError(`Player ${playerID} not found in Team ${teamID}.`);
             }
@@ -141,7 +141,7 @@ class TeamController extends MainController {
             team.teamPoints++;
             this.SendSocketALL(socket, 'updateTeamPoints', team, 'Team send successfully', 'updateTeam Failded');
 
-            this.Debug(`Point added to Team ${teamID}. Current points: ${team.teamPoints}.`, team);
+            // this.Debug(`Point added to Team ${teamID}. Current points: ${team.teamPoints}.`, team);
         } else {
             this.DebugError(`Team with ID ${teamID} not found.`);
         }
