@@ -53,9 +53,21 @@ class PlayerController extends MainController {
 
             socket.on("playerDamage", (data) => this.handleDamagePlayer(socket, data));
             socket.on("playerRevive", (data) => this.handleRevivePlayer(socket, data));
+
+            socket.on("starttst1", (data) => {
+                console.log(data);
+                this.SendSocketBroadcast(socket, 'starttst1', data, 'tst1 successfully', 'tst1 Failded')
+
+            }
+            );
+
+            socket.on("tst1", (data) => this.handleTest1(socket, data));
             // socket.on('playerData', (data) => this.handlePlayerData(socket, data));
 
-            socket.on('disconnect', () => this.handlePlayerDisconnect(socket));
+
+
+            // socket.on('disconnect', () => this.handlePlayerDisconnect(socket));
+            socket.on('discon', (data) => this.handlePlayerDiscon(socket, data));
         });
     }
 
@@ -87,24 +99,24 @@ class PlayerController extends MainController {
                 this.teamController?.addPlayerToTeam(player.playerID, player.playerData.teamID);
 
                 this.Debug("Player Connect  ");
-
-                if (this.gamePlayController.gameData.mainTimer > 0) {
-                    this.SendSocketEmit(socket, "Set Timer", new IntegerValue(this.gameData.mainTimer / 60), "Late Timer Sent", "Timers Error");
-                }
-                if (this.gamePlayController.gameData.currentEnvID>0) {
-                    this.SendSocketEmit(socket, "Set Map", new IntegerValue(this.gameData.currentEnvID), "Late Map Sent", "Map Error");
-                }
-                if (this.gamePlayController.gameData.gameStarted>0) {
-                    this.SendSocketEmit(socket, "gameStarted", new IntegerValue(0), "Late game started", "");
-                }
-
+                /*
+                                if (this.gamePlayController.gameData.mainTimer > 0) {
+                                    this.SendSocketEmit(socket, "Set Timer", new IntegerValue(this.gameData.mainTimer / 60), "Late Timer Sent", "Timers Error");
+                                }
+                                if (this.gamePlayController.gameData.currentEnvID>0) {
+                                    this.SendSocketEmit(socket, "Set Map", new IntegerValue(this.gameData.currentEnvID), "Late Map Sent", "Map Error");
+                                }
+                                if (this.gamePlayController.gameData.gameStarted>0) {
+                                    this.SendSocketEmit(socket, "gameStarted", new IntegerValue(0), "Late game started", "");
+                                }
+                */
             } else {
                 this.Debug("Player already exists:", player.playerTransform.playerID);
             }
         } else {
             this.Debug("Admin Connect ");
 
-        }
+        } 11
     }
 
     /**
@@ -240,6 +252,23 @@ class PlayerController extends MainController {
         }
     }
 
+    handlePlayerDiscon(socket, data) {
+
+        const P = this.Players.find(p => p.playerData.resetpointID === data.resetpointID)
+
+        if (P) {
+
+            this.teamController.removePlayerFromTeam(P.playerID, P.playerData.teamID)
+
+            this.Players = this.Players.filter(player => player.playerID !== P.playerID)
+
+            this.SendSocketALL(socket, "playerDisconnect", P.playerData, "Player Disconnect Succesfully.." + P.playerID, "Player Disconnect Failed")
+
+        } else {
+            this.DebugError("Player Nulll || Admin Disconnect...");
+        }
+    }
+
     handleDamagePlayer(socket, data) {
         this.Debug('Received Player Health Change:', data);
 
@@ -292,7 +321,10 @@ class PlayerController extends MainController {
             socket.emit('playerHealthChangeError', { error });
         }
     }
+    handleTest1(socket, data) {
 
+        this.SendSocketBroadcast(socket, 'tst1', data, 'tst1 successfully', 'tst1 Failded');
+    }
     sendRestPlayersHealth(socket) {
         this.Players.forEach(player => {
             if (player && player.playerData) {
