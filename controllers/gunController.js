@@ -80,6 +80,7 @@ class GunController extends MainController {
             socket.on('playerShoot', (data) => this.handlePlayerShoot(socket, data));
             socket.on('reloadGun', (data) => this.handleReloadGun(socket, data));
             socket.on('restGun', (data) => this.handleRestGun(socket, data));
+            socket.on('changeReloadDelay', (data) => this.handleChangeReloadDelay(socket, data));
             
             //socket.on('disconnect', () => this.Debug('Client disconnected from GunController'));
         });
@@ -193,8 +194,8 @@ class GunController extends MainController {
     }
 
     handleReloadGun(socket, gunData) {
-        this.Debug('handle Reload:', gunData);
 
+        
         this.ReloadGun(gunData.gunID);
         
         this.SendSocketALL(socket, 'reloadGun', gunData,"","");
@@ -202,12 +203,16 @@ class GunController extends MainController {
     }
 
     handleRestGun(socket, data) {
-        this.Debug('handle Reload:', data);
 
+        
         this.ReloadGun(data.ID);
         
         this.SendSocketALL(socket, 'restGun', data,"","");
 
+    }
+
+    handleChangeReloadDelay(socket, data) {        
+        this.SendSocketALL(socket, 'changeReloadDelay', data,"","");
     }
 }
 

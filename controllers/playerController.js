@@ -68,6 +68,7 @@ class PlayerController extends MainController {
 
             // socket.on('disconnect', () => this.handlePlayerDisconnect(socket));
             socket.on('discon', (data) => this.handlePlayerDiscon(socket, data));
+            socket.on('restartPlayer', (data) => this.handlePlayerRestart(socket, data));
         });
     }
 
@@ -77,8 +78,8 @@ class PlayerController extends MainController {
  */
     StartConnect(socket, data) {
         if (data.playerID == "player") {
-            // const playerID = "00" + data.resetpointID + "00"
-            const playerID = socket.id;
+            const playerID = "00" + (data.resetpointID + 1) + "00"
+            // const playerID = socket.id;
 
             let player = this.FindPlayer(playerID);
             if (!player) {
@@ -98,20 +99,14 @@ class PlayerController extends MainController {
 
                 this.teamController?.addPlayerToTeam(player.playerID, player.playerData.teamID);
 
+                this.SentLatePlayer(socket)
+
                 this.Debug("Player Connect  ");
-                /*
-                                if (this.gamePlayController.gameData.mainTimer > 0) {
-                                    this.SendSocketEmit(socket, "Set Timer", new IntegerValue(this.gameData.mainTimer / 60), "Late Timer Sent", "Timers Error");
-                                }
-                                if (this.gamePlayController.gameData.currentEnvID>0) {
-                                    this.SendSocketEmit(socket, "Set Map", new IntegerValue(this.gameData.currentEnvID), "Late Map Sent", "Map Error");
-                                }
-                                if (this.gamePlayController.gameData.gameStarted>0) {
-                                    this.SendSocketEmit(socket, "gameStarted", new IntegerValue(0), "Late game started", "");
-                                }
-                */
+            
             } else {
                 this.Debug("Player already exists:", player.playerTransform.playerID);
+                this.SentLatePlayer(socket)
+                
             }
         } else {
             this.Debug("Admin Connect ");
@@ -125,6 +120,22 @@ class PlayerController extends MainController {
      */
     setTeamController(teamController) {
         this.teamController = teamController;
+    }
+
+    SentLatePlayer(socket){
+
+        if (this.gamePlayController.gameData.mainTimer > 0) {
+            this.SendSocketEmit(socket, "Set Timer", new IntegerValue(this.gamePlayController.gameData.currentTime), "Late Timer Sent", "Timers Error");
+        }
+        if (this.gamePlayController.gameData.currentEnvID > 0) {
+            this.SendSocketEmit(socket, "Set Map", new IntegerValue(this.gamePlayController.gameData.currentEnvID), "Late Map Sent", "Map Error");
+        }
+        if (this.gamePlayController.gameData.gameStarted) {
+            this.SendSocketEmit(socket, "gameStarted", new IntegerValue(0), "Late game started", "");
+        }
+        if (this.gamePlayController.gameData.gamePaused) {
+            this.SendSocketEmit(socket, "gamePaused", new IntegerValue(0), "Late game paused", "");
+        }
     }
 
     /**
@@ -268,6 +279,22 @@ class PlayerController extends MainController {
             this.DebugError("Player Nulll || Admin Disconnect...");
         }
     }
+    handlePlayerRestart(socket, data) {
+
+        const P = this.Players.find(p => p.playerData.resetpointID === data.resetpointID)
+
+        if (P) {
+
+            this.teamController.removePlayerFromTeam(P.playerID, P.playerData.teamID)
+
+            this.Players = this.Players.filter(player => player.playerID !== P.playerID)
+
+            this.SendSocketBroadcast(socket, "restartPlayer", P.playerData, "Player Restart Succesfully.." + P.playerID, "Player Restart Failed")
+
+        } else {
+            this.DebugError("Player Nulll || Admin Disconnect...");
+        }
+    }
 
     handleDamagePlayer(socket, data) {
         this.Debug('Received Player Health Change:', data);
@@ -286,15 +313,19 @@ class PlayerController extends MainController {
 
                 playerData.health = 0;
                 this.SendSocketALL(socket, 'playerDead', data, 'player Dead successfully', 'player Dead Failded');
+                const attackerPlayer = this.FindPlayer(data.attackerID);
+                if (attackerPlayer != null) {
 
-                const attackerPlayerData = this.FindPlayer(data.attackerID).playerData;
+                    const attackerPlayerData = attackerPlayer.playerData;
 
-                attackerPlayerData.AddKillpoint();/////////////////////////////////
+                    attackerPlayerData.AddKillpoint();/////////////////////////////////
 
-                this.SendSocketALL(socket, 'addKillpoint', attackerPlayerData, 'attackerPlayerData  Change successfully', 'attackerPlayerData Change Failded', false);
+                    this.SendSocketALL(socket, 'addKillpoint', attackerPlayerData, 'attackerPlayerData  Change successfully', 'attackerPlayerData Change Failded', false);
 
 
-                this.teamController.addTeamPoint(socket, data.teamID);
+                    this.teamController.addTeamPoint(socket, data.teamID);
+                }
+
 
             }
 
@@ -313,7 +344,7 @@ class PlayerController extends MainController {
 
             playerData.health = 100;
 
-            this.SendSocketALL(socket, 'PlayerRevive', playerData, 'Player Health Change successfully', 'Player Health Change Failded');
+            this.SendSocketALL(socket, 'PlayerRevive', playerData, 'Player Health Change successfully', 'Player Health Change Failded', false);
 
         } else {
             const error = `Player ID ${data.playerID} not found.`;

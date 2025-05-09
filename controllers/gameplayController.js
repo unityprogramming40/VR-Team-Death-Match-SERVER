@@ -98,7 +98,7 @@ class GameplayController extends MainController {
 
 
             socket.on("mapObjChange", (data) => {
-                this.SendSocketBroadcast(socket, "mapObjChange", data, "object map sent", "object map failed");
+                this.SendSocketBroadcast(socket, "mapObjChange", data, "object map sent", "object map failed",false);
             });
         });
     }
@@ -134,7 +134,7 @@ class GameplayController extends MainController {
 
     handleGameAleadryStatred(socket) {
 
-        this.SendSocketEmit(socket, "Set Timer", new IntegerValue(this.gameData.mainTimer / 60), "Timer Sent", "Timers Error");
+        // this.SendSocketEmit(socket, "Set Timer", new IntegerValue(this.gameData.mainTimer / 60), "Timer Sent", "Timers Error");
         this.SendSocketEmit(socket, "Set Map", new IntegerValue(this.gameData.currentEnvID), "Map Sent", "Map Error");
         this.SendSocketEmit(socket, "gameStarted", new IntegerValue(0), "", "");
 
