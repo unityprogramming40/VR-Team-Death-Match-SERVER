@@ -228,6 +228,7 @@ class PlayerController extends MainController {
             this.DebugError("Invalid data received for syncPlayerTransform.");
             return;
         }
+        console.log(data)
 
         this.SendSocketALL(
             socket,
